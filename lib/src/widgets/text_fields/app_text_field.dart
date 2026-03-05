@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_theme.dart';
 
 /// A theme-aware, fully-featured text field widget.
 ///
@@ -29,7 +27,7 @@ import '../../theme/app_theme.dart';
 /// )
 /// ```
 class AppTextField extends StatefulWidget {
-  /// Floating label shown above the input when focused or filled.
+  /// Static label displayed above the input field.
   final String? label;
 
   /// Placeholder text shown when the field is empty.
@@ -151,21 +149,21 @@ class _AppTextFieldState extends State<AppTextField> {
   // Build suffix icon
   // ---------------------------------------------------------------------------
 
-  Widget? get _effectiveSuffixIcon {
+  Widget _buildSuffixIcon(BuildContext context) {
     // Visibility toggle takes precedence when obscureText is true
     if (widget.obscureText) {
       return IconButton(
         icon: Icon(
           _obscured ? Icons.visibility_off_outlined : Icons.visibility_outlined,
           size: 20,
-          color: AppColors.onSurfaceVariant,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
         splashRadius: 18,
         onPressed: _toggleObscured,
         tooltip: _obscured ? 'Show password' : 'Hide password',
       );
     }
-    return widget.suffixIcon;
+    return widget.suffixIcon ?? const SizedBox.shrink();
   }
 
   // ---------------------------------------------------------------------------
@@ -173,26 +171,16 @@ class _AppTextFieldState extends State<AppTextField> {
   // ---------------------------------------------------------------------------
 
   InputDecoration _buildDecoration(BuildContext context) {
-    final theme = Theme.of(context);
     final hasError = widget.errorText != null && widget.errorText!.isNotEmpty;
 
     return InputDecoration(
-      labelText: widget.label,
       hintText: widget.hint,
-      helperText: hasError ? null : widget.helperText,
       errorText: hasError ? widget.errorText : null,
       prefixIcon: widget.prefixIcon,
-      suffixIcon: _effectiveSuffixIcon,
-      // Inherit all border and color styling from InputDecorationTheme
-      // (configured inside AppTheme). Override error tint only when needed.
-      errorBorder: OutlineInputBorder(
-        borderRadius: AppTheme.borderRadiusSm,
-        borderSide: BorderSide(color: theme.colorScheme.error),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: AppTheme.borderRadiusSm,
-        borderSide: BorderSide(color: theme.colorScheme.error, width: 2),
-      ),
+      // Only set suffix when obscureText is active; otherwise fall through to theme
+      suffixIcon: widget.obscureText || widget.suffixIcon != null
+          ? _buildSuffixIcon(context)
+          : null,
     );
   }
 
@@ -200,7 +188,10 @@ class _AppTextFieldState extends State<AppTextField> {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+
+    final field = TextFormField(
       controller: widget.controller,
       focusNode: widget.focusNode,
       initialValue: widget.controller == null ? widget.initialValue : null,
@@ -208,7 +199,7 @@ class _AppTextFieldState extends State<AppTextField> {
       textInputAction: widget.textInputAction,
       obscureText: _obscured,
       maxLines: widget.obscureText ? 1 : widget.maxLines,
-      minLines: widget.minLines,
+      minLines: widget.obscureText ? null : widget.minLines,
       maxLength: widget.maxLength,
       enabled: widget.enabled,
       readOnly: widget.readOnly,
@@ -224,6 +215,27 @@ class _AppTextFieldState extends State<AppTextField> {
           ? (_) => widget.onTapOutside!()
           : (_) => FocusScope.of(context).unfocus(),
       decoration: _buildDecoration(context),
+    );
+
+    if (widget.label == null) return field;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          widget.label!,
+          style: tt.labelMedium?.copyWith(
+            color: widget.enabled ? cs.onSurface : cs.onSurface.withValues(alpha: 0.38),
+          ),
+        ),
+        if (widget.helperText != null) ...[
+          const SizedBox(height: 2),
+          Text(widget.helperText!, style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+        ],
+        const SizedBox(height: 6),
+        field,
+      ],
     );
   }
 }

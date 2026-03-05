@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_text_styles.dart';
-import '../../theme/app_theme.dart';
 import '../buttons/primary_button.dart';
 
 /// Semantic intent of an [AppDialog] action button pair.
@@ -124,12 +121,12 @@ class AppDialog extends StatelessWidget {
   // ---------------------------------------------------------------------------
 
   Color _confirmColor(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final cs = Theme.of(context).colorScheme;
     return switch (config.type) {
-      DialogType.info => colorScheme.primary,
-      DialogType.success => AppColors.success,
-      DialogType.warning => AppColors.warning,
-      DialogType.destructive => AppColors.error,
+      DialogType.info => cs.primary,
+      DialogType.success => cs.secondary,
+      DialogType.warning => cs.error,
+      DialogType.destructive => cs.error,
     };
   }
 
@@ -173,7 +170,6 @@ class AppDialog extends StatelessWidget {
     final confirmColor = _confirmColor(context);
 
     return Dialog(
-      shape: const RoundedRectangleBorder(borderRadius: AppTheme.borderRadiusLg),
       insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -188,14 +184,16 @@ class AppDialog extends StatelessWidget {
             // ---- Title ----
             Text(
               config.title,
-              style: AppTextStyles.titleLarge.copyWith(color: theme.colorScheme.onSurface),
+              style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
 
             // ---- Content ----
             DefaultTextStyle(
-              style: AppTextStyles.bodyMedium.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              style: (theme.textTheme.bodyMedium ?? const TextStyle()).copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
               textAlign: TextAlign.center,
               child: config.content,
             ),
@@ -246,12 +244,11 @@ class _DialogActions extends StatelessWidget {
         onPressed: onConfirm,
         style: ElevatedButton.styleFrom(
           backgroundColor: confirmColor,
-          foregroundColor: Colors.white,
+          foregroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           shadowColor: Colors.transparent,
-          shape: const RoundedRectangleBorder(borderRadius: AppTheme.borderRadius),
           padding: const EdgeInsets.symmetric(vertical: 14),
-          textStyle: AppTextStyles.labelLarge,
+          textStyle: Theme.of(context).textTheme.labelLarge,
         ),
         child: Text(confirmLabel),
       ),
