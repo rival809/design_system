@@ -40,10 +40,14 @@ class AppTextField extends StatefulWidget {
   /// renders in the error state and [helperText] is suppressed.
   final String? errorText;
 
-  /// Leading icon placed inside the field prefix area.
+  /// Widget placed inside the field prefix area.
+  /// Accepts any widget: [Icon], [SvgPicture], or a fully custom widget.
+  /// It is automatically sized (48×field-height) and centered.
   final Widget? prefixIcon;
 
-  /// Trailing icon placed inside the field suffix area.
+  /// Widget placed inside the field suffix area.
+  /// Accepts any widget: [Icon], [SvgPicture], or a fully custom widget.
+  /// When [obscureText] is `true` this is replaced by the visibility toggle.
   final Widget? suffixIcon;
 
   /// When `true`, the field renders an eye-toggle suffix and hides the text.
@@ -146,10 +150,27 @@ class _AppTextFieldState extends State<AppTextField> {
   void _toggleObscured() => setState(() => _obscured = !_obscured);
 
   // ---------------------------------------------------------------------------
-  // Build suffix icon
+  // Adornment wrapper — normalises Icon / SVG / any Widget into a consistently
+  // sized, centred prefix/suffix slot with the correct icon color.
   // ---------------------------------------------------------------------------
 
-  Widget _buildSuffixIcon(BuildContext context) {
+  Widget _wrapAdornment(BuildContext context, Widget child) {
+    return SizedBox(
+      width: 48,
+      child: Center(
+        child: IconTheme(
+          data: IconThemeData(color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Build suffix slot
+  // ---------------------------------------------------------------------------
+
+  Widget _buildSuffix(BuildContext context) {
     // Visibility toggle takes precedence when obscureText is true
     if (widget.obscureText) {
       return IconButton(
@@ -163,7 +184,7 @@ class _AppTextFieldState extends State<AppTextField> {
         tooltip: _obscured ? 'Show password' : 'Hide password',
       );
     }
-    return widget.suffixIcon ?? const SizedBox.shrink();
+    return _wrapAdornment(context, widget.suffixIcon!);
   }
 
   // ---------------------------------------------------------------------------
@@ -172,15 +193,20 @@ class _AppTextFieldState extends State<AppTextField> {
 
   InputDecoration _buildDecoration(BuildContext context) {
     final hasError = widget.errorText != null && widget.errorText!.isNotEmpty;
-
+    final tt = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final fillColor = widget.enabled ? cs.surface : cs.onSurface.withValues(alpha: 0.12);
     return InputDecoration(
+      filled: true,
+      fillColor: fillColor,
       hintText: widget.hint,
+      hintStyle: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
       errorText: hasError ? widget.errorText : null,
-      prefixIcon: widget.prefixIcon,
-      // Only set suffix when obscureText is active; otherwise fall through to theme
-      suffixIcon: widget.obscureText || widget.suffixIcon != null
-          ? _buildSuffixIcon(context)
-          : null,
+      errorStyle: tt.bodySmall?.copyWith(color: cs.error),
+      prefixIcon: widget.prefixIcon != null ? _wrapAdornment(context, widget.prefixIcon!) : null,
+      prefixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+      suffixIcon: widget.obscureText || widget.suffixIcon != null ? _buildSuffix(context) : null,
+      suffixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),
     );
   }
 
@@ -207,7 +233,7 @@ class _AppTextFieldState extends State<AppTextField> {
       autofillHints: widget.autofillHints,
       inputFormatters: widget.inputFormatters,
       validator: widget.validator,
-      style: Theme.of(context).textTheme.bodyMedium,
+      style: Theme.of(context).textTheme.bodySmall,
       cursorColor: Theme.of(context).colorScheme.primary,
       onChanged: widget.onChanged,
       onFieldSubmitted: widget.onSubmitted,
@@ -225,7 +251,7 @@ class _AppTextFieldState extends State<AppTextField> {
       children: [
         Text(
           widget.label!,
-          style: tt.labelMedium?.copyWith(
+          style: tt.titleSmall?.copyWith(
             color: widget.enabled ? cs.onSurface : cs.onSurface.withValues(alpha: 0.38),
           ),
         ),
