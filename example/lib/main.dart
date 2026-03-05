@@ -7,6 +7,7 @@ import 'pages/typography_page.dart';
 import 'pages/buttons_page.dart';
 import 'pages/inputs_page.dart';
 import 'pages/dialogs_page.dart';
+import 'pages/form_page.dart';
 
 final logger = Logger(
   printer: PrettyPrinter(
@@ -119,6 +120,11 @@ class _ShowcasePageState extends State<_ShowcasePage> {
       selectedIcon: Icon(Icons.chat_bubble),
       label: 'Dialogs',
     ),
+    NavigationDestination(
+      icon: Icon(Icons.edit_note_outlined),
+      selectedIcon: Icon(Icons.edit_note),
+      label: 'Form',
+    ),
   ];
 
   @override
@@ -129,6 +135,7 @@ class _ShowcasePageState extends State<_ShowcasePage> {
       const ButtonsPage(),
       const InputsPage(),
       const DialogsPage(),
+      const FormPage(),
     ];
 
     return Scaffold(
