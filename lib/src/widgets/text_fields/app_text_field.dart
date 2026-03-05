@@ -149,6 +149,14 @@ class _AppTextFieldState extends State<AppTextField> {
 
   void _toggleObscured() => setState(() => _obscured = !_obscured);
 
+  @override
+  void didUpdateWidget(AppTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.obscureText != widget.obscureText) {
+      _obscured = widget.obscureText;
+    }
+  }
+
   // ---------------------------------------------------------------------------
   // Adornment wrapper — normalises Icon / SVG / any Widget into a consistently
   // sized, centred prefix/suffix slot with the correct icon color.
@@ -179,7 +187,6 @@ class _AppTextFieldState extends State<AppTextField> {
           size: 20,
           color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
-        splashRadius: 18,
         onPressed: _toggleObscured,
         tooltip: _obscured ? 'Show password' : 'Hide password',
       );
@@ -233,8 +240,8 @@ class _AppTextFieldState extends State<AppTextField> {
       autofillHints: widget.autofillHints,
       inputFormatters: widget.inputFormatters,
       validator: widget.validator,
-      style: Theme.of(context).textTheme.bodySmall,
-      cursorColor: Theme.of(context).colorScheme.primary,
+      style: tt.bodySmall,
+      cursorColor: cs.primary,
       onChanged: widget.onChanged,
       onFieldSubmitted: widget.onSubmitted,
       onTapOutside: widget.onTapOutside != null
@@ -249,10 +256,13 @@ class _AppTextFieldState extends State<AppTextField> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          widget.label!,
-          style: tt.titleSmall?.copyWith(
-            color: widget.enabled ? cs.onSurface : cs.onSurface.withValues(alpha: 0.38),
+        Semantics(
+          label: widget.label,
+          child: Text(
+            widget.label!,
+            style: tt.titleSmall?.copyWith(
+              color: widget.enabled ? cs.onSurface : cs.onSurface.withValues(alpha: 0.38),
+            ),
           ),
         ),
         if (widget.helperText != null) ...[
