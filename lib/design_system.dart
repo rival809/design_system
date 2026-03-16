@@ -13,3 +13,4 @@ export 'src/widgets/text_fields/app_text_field.dart';
 export 'src/widgets/dialogs/app_dialog.dart';
 export 'src/widgets/dropdowns/app_searchable_dropdown.dart';
 export 'src/widgets/date_pickers/app_date_picker.dart';
+export 'src/widgets/snackbars/app_snackbar.dart';

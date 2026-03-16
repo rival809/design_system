@@ -124,9 +124,18 @@ class AppDialog extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return switch (config.type) {
       DialogType.info => cs.primary,
-      DialogType.success => cs.secondary,
+      DialogType.success => cs.primary,
       DialogType.warning => cs.error,
       DialogType.destructive => cs.error,
+    };
+  }
+
+  ButtonVariant _confirmVariant() {
+    return switch (config.type) {
+      DialogType.info => ButtonVariant.filled,
+      DialogType.success => ButtonVariant.filled,
+      DialogType.warning => ButtonVariant.danger,
+      DialogType.destructive => ButtonVariant.danger,
     };
   }
 
@@ -167,48 +176,52 @@ class AppDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final confirmColor = _confirmColor(context);
 
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // ---- Icon ----
-            _buildIcon(context)!,
-            const SizedBox(height: 16),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: IntrinsicWidth(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // ---- Icon ----
+                _buildIcon(context)!,
+                const SizedBox(height: 16),
 
-            // ---- Title ----
-            Text(
-              config.title,
-              style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
+                // ---- Title ----
+                Text(
+                  config.title,
+                  style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
 
-            // ---- Content ----
-            DefaultTextStyle(
-              style: (theme.textTheme.bodyMedium ?? const TextStyle()).copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-              child: config.content,
-            ),
-            const SizedBox(height: 24),
+                // ---- Content ----
+                DefaultTextStyle(
+                  style: (theme.textTheme.bodyMedium ?? const TextStyle()).copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                  child: config.content,
+                ),
+                const SizedBox(height: 24),
 
-            // ---- Actions ----
-            _DialogActions(
-              confirmLabel: config.confirmLabel,
-              cancelLabel: config.cancelLabel,
-              showCancelButton: config.showCancelButton,
-              confirmColor: confirmColor,
-              onConfirm: () => _handleConfirm(context),
-              onCancel: () => _handleCancel(context),
+                // ---- Actions ----
+                _DialogActions(
+                  confirmLabel: config.confirmLabel,
+                  cancelLabel: config.cancelLabel,
+                  showCancelButton: config.showCancelButton,
+                  confirmVariant: _confirmVariant(),
+                  onConfirm: () => _handleConfirm(context),
+                  onCancel: () => _handleCancel(context),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -224,7 +237,7 @@ class _DialogActions extends StatelessWidget {
     required this.confirmLabel,
     required this.cancelLabel,
     required this.showCancelButton,
-    required this.confirmColor,
+    required this.confirmVariant,
     required this.onConfirm,
     required this.onCancel,
   });
@@ -232,44 +245,27 @@ class _DialogActions extends StatelessWidget {
   final String confirmLabel;
   final String cancelLabel;
   final bool showCancelButton;
-  final Color confirmColor;
+  final ButtonVariant confirmVariant;
   final VoidCallback onConfirm;
   final VoidCallback onCancel;
 
   @override
   Widget build(BuildContext context) {
-    final confirmButton = SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: onConfirm,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: confirmColor,
-          foregroundColor: Theme.of(context).colorScheme.surface,
-          elevation: 0,
-          shadowColor: Colors.transparent,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          textStyle: Theme.of(context).textTheme.labelLarge,
-        ),
-        child: Text(confirmLabel),
-      ),
+    final confirmButton = PrimaryButton(
+      label: confirmLabel,
+      variant: confirmVariant,
+      onPressed: onConfirm,
     );
 
     if (!showCancelButton) return confirmButton;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         confirmButton,
         const SizedBox(height: 8),
-        SizedBox(
-          width: double.infinity,
-          child: PrimaryButton(
-            label: cancelLabel,
-            variant: ButtonVariant.text,
-            onPressed: onCancel,
-            expand: true,
-          ),
-        ),
+        PrimaryButton(label: cancelLabel, variant: ButtonVariant.text, onPressed: onCancel),
       ],
     );
   }

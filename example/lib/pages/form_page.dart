@@ -170,17 +170,7 @@ class _FormPageState extends State<FormPage> {
     if (!mounted) return;
     setState(() => _status = FormzSubmissionStatus.success);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Form berhasil dikirim!',
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onInverseSurface),
-        ),
-        backgroundColor: Theme.of(context).colorScheme.inverseSurface,
-      ),
-    );
+    AppSnackbar.show(context, message: 'Form berhasil dikirim!', type: SnackbarType.success);
 
     setState(() => _status = FormzSubmissionStatus.initial);
   }

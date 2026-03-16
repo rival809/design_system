@@ -64,22 +64,7 @@ class _RegistrationView extends StatelessWidget {
         if (state.status == RegistrationStatus.success && state.createdUser != null) {
           _showSuccessDialog(context, state);
         } else if (state.status == RegistrationStatus.failure && state.errorMessage != null) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Icon(Icons.error_outline, color: Colors.white, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(state.errorMessage!)),
-                  ],
-                ),
-                backgroundColor: Theme.of(context).colorScheme.error,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-            );
+          AppSnackbar.show(context, message: state.errorMessage!, type: SnackbarType.error);
         }
       },
       child: const _RegistrationForm(),

@@ -1,3 +1,4 @@
+import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -80,17 +81,13 @@ class _UserListViewState extends State<_UserListView> {
               // Show snackbar only when a loadMore fails (users already visible)
               listenWhen: (p, c) => c.isError && c.users.isNotEmpty && p.status != c.status,
               listener: (context, state) {
-                ScaffoldMessenger.of(context)
-                  ..hideCurrentSnackBar()
-                  ..showSnackBar(
-                    SnackBar(
-                      content: const Text('Gagal memuat halaman berikutnya'),
-                      action: SnackBarAction(
-                        label: 'Coba lagi',
-                        onPressed: () => context.read<UserListCubit>().loadMore(),
-                      ),
-                    ),
-                  );
+                AppSnackbar.show(
+                  context,
+                  message: 'Gagal memuat halaman berikutnya',
+                  type: SnackbarType.error,
+                  actionLabel: 'Coba lagi',
+                  onAction: () => context.read<UserListCubit>().loadMore(),
+                );
               },
               builder: (context, state) {
                 // First-page loading

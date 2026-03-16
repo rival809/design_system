@@ -225,6 +225,65 @@ class _ButtonsSection extends StatelessWidget {
           expand: true,
           onPressed: () {},
         ),
+
+        const SizedBox(height: 28),
+
+        // ── Snackbar ─────────────────────────────────────────────────────────
+        Text('Snackbar', style: tt.titleSmall),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            PrimaryButton(
+              label: 'Info',
+              onPressed: () => AppSnackbar.show(
+                context,
+                message: 'Ini adalah snackbar info.',
+                type: SnackbarType.info,
+              ),
+            ),
+            PrimaryButton(
+              label: 'Success',
+              variant: ButtonVariant.secondary,
+              onPressed: () => AppSnackbar.show(
+                context,
+                message: 'Operasi berhasil dilakukan.',
+                type: SnackbarType.success,
+              ),
+            ),
+            PrimaryButton(
+              label: 'Warning',
+              variant: ButtonVariant.tertiary,
+              onPressed: () => AppSnackbar.show(
+                context,
+                message: 'Periksa kembali data Anda.',
+                type: SnackbarType.warning,
+              ),
+            ),
+            PrimaryButton(
+              label: 'Error',
+              variant: ButtonVariant.danger,
+              onPressed: () => AppSnackbar.show(
+                context,
+                message: 'Terjadi kesalahan saat memproses permintaan.',
+                type: SnackbarType.error,
+              ),
+            ),
+            PrimaryButton(
+              label: 'With Action',
+              variant: ButtonVariant.outlined,
+              onPressed: () => AppSnackbar.show(
+                context,
+                message: 'Gagal memuat data.',
+                type: SnackbarType.error,
+                actionLabel: 'Coba lagi',
+                onAction: () =>
+                    AppSnackbar.show(context, message: 'Mencoba ulang...', type: SnackbarType.info),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
