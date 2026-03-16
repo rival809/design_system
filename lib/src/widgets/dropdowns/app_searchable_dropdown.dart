@@ -126,26 +126,26 @@ class AppSearchableDropdown<T> extends StatelessWidget {
           : null,
       prefixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide(color: hasError ? cs.error : cs.outline),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide(color: hasError ? cs.error : cs.primary, width: 2),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide(color: cs.error),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide(color: cs.error, width: 2),
       ),
       disabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide(color: cs.onSurface.withValues(alpha: 0.12)),
       ),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
     );
 
     // ── Popup props ──────────────────────────────────────────────────────────
@@ -170,7 +170,7 @@ class AppSearchableDropdown<T> extends StatelessWidget {
         autofocus: true,
       ),
       menuProps: MenuProps(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         elevation: 4,
         backgroundColor: cs.surface,
       ),

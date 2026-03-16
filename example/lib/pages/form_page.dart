@@ -1,6 +1,6 @@
 import 'package:design_system/design_system.dart';
+import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:formz/formz.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
@@ -64,6 +64,24 @@ class _PasswordInput extends FormzInput<String, _PasswordError> {
   }
 }
 
+enum _AmountError { empty, belowMinimum }
+
+class _AmountInput extends FormzInput<String, _AmountError> {
+  const _AmountInput.pure() : super.pure('');
+  const _AmountInput.dirty([super.value = '']) : super.dirty();
+
+  static const minAmount = 10000;
+
+  @override
+  _AmountError? validator(String value) {
+    final digits = value.replaceAll(RegExp(r'\D'), '');
+    if (digits.isEmpty) return _AmountError.empty;
+    final amount = int.tryParse(digits) ?? 0;
+    if (amount < minAmount) return _AmountError.belowMinimum;
+    return null;
+  }
+}
+
 // =============================================================================
 // Page
 // =============================================================================
@@ -83,13 +101,14 @@ class _FormPageState extends State<FormPage> {
   var _email = const _EmailInput.pure();
   var _phone = const _PhoneInput.pure();
   var _password = const _PasswordInput.pure();
+  var _amount = const _AmountInput.pure();
 
-  // Currency controller (flutter_masked_text2)
-  final _currencyController = MoneyMaskedTextController(
-    decimalSeparator: '',
-    thousandSeparator: '.',
-    leftSymbol: 'Rp ',
-    precision: 0,
+  final _currencyFormatter = CurrencyTextInputFormatter.currency(
+    enableNegative: false,
+    minValue: 0,
+    locale: 'id',
+    decimalDigits: 0,
+    symbol: '',
   );
 
   // Phone mask formatter
@@ -100,13 +119,7 @@ class _FormPageState extends State<FormPage> {
 
   FormzSubmissionStatus _status = FormzSubmissionStatus.initial;
 
-  @override
-  void dispose() {
-    _currencyController.dispose();
-    super.dispose();
-  }
-
-  bool get _isValid => Formz.validate([_name, _email, _phone, _password]);
+  bool get _isValid => Formz.validate([_name, _email, _phone, _password, _amount]);
 
   String? _nameError() => switch (_name.displayError) {
     _NameError.empty => 'Nama tidak boleh kosong',
@@ -131,6 +144,12 @@ class _FormPageState extends State<FormPage> {
     null => null,
   };
 
+  String? _amountError() => switch (_amount.displayError) {
+    _AmountError.empty => 'Nominal tidak boleh kosong',
+    _AmountError.belowMinimum => 'Nominal minimal Rp 10.000',
+    null => null,
+  };
+
   Future<void> _submit() async {
     // Mark all dirty to trigger validation display
     setState(() {
@@ -138,6 +157,7 @@ class _FormPageState extends State<FormPage> {
       _email = _EmailInput.dirty(_email.value);
       _phone = _PhoneInput.dirty(_phone.value);
       _password = _PasswordInput.dirty(_password.value);
+      _amount = _AmountInput.dirty(_amount.value);
     });
 
     if (!_isValid) return;
@@ -182,7 +202,7 @@ class _FormPageState extends State<FormPage> {
             const SizedBox(height: 4),
             Text(
               'Validasi menggunakan formz · Mask menggunakan mask_text_input_formatter · '
-              'Currency menggunakan flutter_masked_text2',
+              'Currency menggunakan currency_text_input_formatter',
               style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
             ),
             const SizedBox(height: 28),
@@ -232,10 +252,13 @@ class _FormPageState extends State<FormPage> {
             AppTextField(
               label: 'Nominal Transfer',
               helperText: 'Minimal Rp 10.000',
+              errorText: _amountError(),
               prefixIcon: const Icon(Icons.payments_outlined),
               keyboardType: TextInputType.number,
               textInputAction: TextInputAction.next,
-              controller: _currencyController,
+              inputFormatters: [_currencyFormatter],
+              onChanged: (v) => setState(() => _amount = _AmountInput.dirty(v)),
+              validator: (_) => _amountError(),
             ),
             const SizedBox(height: 20),
 

@@ -328,6 +328,7 @@ class _FilledButton extends StatelessWidget {
         shadowColor: Colors.transparent,
         padding: padding,
         textStyle: labelStyle,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
       child: _ButtonContent(
         label: label,
@@ -381,6 +382,7 @@ class _OutlinedButtonWidget extends StatelessWidget {
         ),
         padding: padding,
         textStyle: labelStyle,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
       child: _ButtonContent(
         label: label,
@@ -428,6 +430,7 @@ class _TextButtonWidget extends StatelessWidget {
         disabledForegroundColor: colorScheme.onSurface.withValues(alpha: 0.38),
         padding: padding,
         textStyle: labelStyle,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
       child: _ButtonContent(
         label: label,
@@ -485,6 +488,7 @@ class _SecondaryButton extends StatelessWidget {
         ),
         padding: padding,
         textStyle: labelStyle,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
       child: _ButtonContent(
         label: label,
@@ -541,6 +545,7 @@ class _DangerButton extends StatelessWidget {
         shadowColor: Colors.transparent,
         padding: padding,
         textStyle: labelStyle,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
       child: _ButtonContent(
         label: label,
@@ -593,6 +598,7 @@ class _TertiaryButton extends StatelessWidget {
         disabledForegroundColor: cs.onSurface.withValues(alpha: 0.38),
         padding: padding,
         textStyle: labelStyle,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
       child: _ButtonContent(
         label: label,
@@ -647,7 +653,7 @@ class _LinkButton extends StatelessWidget {
     // Use InkWell directly so the ripple/hotspot is tight around the content.
     return InkWell(
       onTap: onPressed,
-      borderRadius: const BorderRadius.all(Radius.circular(4)),
+      borderRadius: BorderRadius.circular(8),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
         child: _ButtonContent(

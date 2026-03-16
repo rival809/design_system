@@ -181,6 +181,7 @@ ThemeData buildTheme(Brightness brightness) {
     useMaterial3: true,
     colorScheme: colorScheme,
     textTheme: textTheme,
+    visualDensity: VisualDensity.standard,
 
     // ---- AppBar ----
     appBarTheme: const AppBarTheme(elevation: 0, scrolledUnderElevation: 1, centerTitle: false),

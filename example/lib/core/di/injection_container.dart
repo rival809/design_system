@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 
 import '../network/dio_client.dart';
+import '../theme/theme_notifier.dart';
 import '../../features/user_registration/data/datasources/user_remote_datasource.dart';
 import '../../features/user_registration/data/repositories/user_repository_impl.dart';
 import '../../features/user_registration/domain/repositories/user_repository.dart';
@@ -15,6 +16,7 @@ final GetIt sl = GetIt.instance;
 /// Register all dependencies. Call once from [main].
 Future<void> initDependencies() async {
   // ── Core ────────────────────────────────────────────────────────────────────
+  sl.registerLazySingleton<ThemeNotifier>(ThemeNotifier.new);
   sl.registerLazySingleton<DioClient>(DioClient.new);
 
   // ── Data Sources ────────────────────────────────────────────────────────────

@@ -1,37 +1,20 @@
 import 'package:design_system/design_system.dart';
+import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_masked_text2/flutter_masked_text2.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/router/route_paths.dart';
 import '../bloc/registration_bloc.dart';
 import '../bloc/registration_event.dart';
 import '../bloc/registration_inputs.dart';
 import '../bloc/registration_state.dart';
-import 'user_list_page.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
-
-String _formatDateId(DateTime date) {
-  const months = [
-    'Januari',
-    'Februari',
-    'Maret',
-    'April',
-    'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
-    'September',
-    'Oktober',
-    'November',
-    'Desember',
-  ];
-  return '${date.day} ${months[date.month - 1]} ${date.year}';
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -59,7 +42,10 @@ class RegistrationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(create: (_) => sl<RegistrationBloc>(), child: const _RegistrationView());
+    return Scaffold(
+      appBar: AppBar(title: const Text('Registrasi Pengguna')),
+      body: BlocProvider(create: (_) => sl<RegistrationBloc>(), child: const _RegistrationView()),
+    );
   }
 }
 
@@ -152,10 +138,7 @@ class _RegistrationView extends StatelessWidget {
                   child: FilledButton(
                     onPressed: () {
                       Navigator.pop(context);
-                      Navigator.push<void>(
-                        context,
-                        MaterialPageRoute(builder: (_) => const UserListPage()),
-                      );
+                      context.go(RoutePaths.users);
                     },
                     child: const Text('Lihat Daftar'),
                   ),
@@ -208,18 +191,33 @@ class _RegistrationFormState extends State<_RegistrationForm> {
     mask: '+62 ###-####-####',
     filter: {'#': RegExp(r'\d')},
   );
-  final _salaryController = MoneyMaskedTextController(
-    decimalSeparator: '',
-    thousandSeparator: '.',
-    leftSymbol: 'Rp ',
-    precision: 0,
-  );
 
-  @override
-  void dispose() {
-    _salaryController.dispose();
-    super.dispose();
+  // Cache untuk departments — API hanya di-hit sekali, selanjutnya filter lokal
+  List<String>? _cachedDepartments;
+
+  Future<List<String>> _fetchDepartments(String query) async {
+    if (_cachedDepartments == null || _cachedDepartments!.isEmpty) {
+      try {
+        // Simulasi network request (ganti dengan repository call di produksi)
+        await Future.delayed(const Duration(milliseconds: 600));
+        final result = _departments;
+        // Hanya cache kalau ada data — kosong atau error → retry saat buka lagi
+        if (result.isNotEmpty) _cachedDepartments = result;
+      } catch (_) {
+        // Biarkan null → dropdown akan retry saat dibuka lagi
+      }
+    }
+    final data = _cachedDepartments ?? [];
+    if (data.isEmpty || query.isEmpty) return data;
+    final q = query.toLowerCase();
+    return data.where((d) => d.toLowerCase().contains(q)).toList();
   }
+
+  final _salaryFormatter = CurrencyTextInputFormatter.currency(
+    locale: 'id',
+    decimalDigits: 0,
+    symbol: 'Rp',
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -311,13 +309,17 @@ class _RegistrationFormState extends State<_RegistrationForm> {
               const SizedBox(height: 16),
 
               // Date of Birth
-              _DatePickerField(
+              AppDatePicker(
                 label: 'Tanggal Lahir *',
+                hint: 'Pilih tanggal lahir',
                 value: state.dateOfBirth,
-                hasError:
-                    state.dateOfBirth == null &&
-                    !state.fullName.isPure, // show error after user starts filling form
-                onDateSelected: (date) =>
+                firstDate: DateTime(1940),
+                lastDate: DateTime.now().subtract(const Duration(days: 365 * 17)),
+                pickerHelpText: 'Pilih Tanggal Lahir',
+                errorText: state.dateOfBirth == null && !state.fullName.isPure
+                    ? 'Tanggal lahir wajib diisi'
+                    : null,
+                onChanged: (date) =>
                     context.read<RegistrationBloc>().add(RegistrationDateOfBirthChanged(date)),
               ),
               const SizedBox(height: 16),
@@ -354,7 +356,7 @@ class _RegistrationFormState extends State<_RegistrationForm> {
                 label: 'Departemen *',
                 hint: 'Pilih departemen',
                 prefixIcon: const Icon(Icons.business_outlined),
-                items: _departments,
+                asyncItems: _fetchDepartments,
                 selectedItem: state.department.value.isEmpty ? null : state.department.value,
                 errorText: _departmentError(state.department.displayError),
                 onChanged: (v) {
@@ -371,7 +373,7 @@ class _RegistrationFormState extends State<_RegistrationForm> {
                 prefixIcon: const Icon(Icons.payments_outlined),
                 keyboardType: TextInputType.number,
                 textInputAction: TextInputAction.next,
-                controller: _salaryController,
+                inputFormatters: [_salaryFormatter],
                 onChanged: (v) =>
                     context.read<RegistrationBloc>().add(RegistrationSalaryChanged(v)),
               ),
@@ -454,10 +456,7 @@ class _RegistrationFormState extends State<_RegistrationForm> {
                 ),
                 icon: const Icon(Icons.group_outlined),
                 label: const Text('Lihat Daftar Pengguna dari API'),
-                onPressed: () => Navigator.push<void>(
-                  context,
-                  MaterialPageRoute(builder: (_) => const UserListPage()),
-                ),
+                onPressed: () => context.go(RoutePaths.users),
               ),
             ],
           ),
@@ -559,91 +558,7 @@ class _SectionLabel extends StatelessWidget {
   }
 }
 
-// ── Date Picker ───────────────────────────────────────────────────────────────
-
-class _DatePickerField extends StatelessWidget {
-  const _DatePickerField({
-    required this.label,
-    required this.value,
-    required this.hasError,
-    required this.onDateSelected,
-  });
-
-  final String label;
-  final DateTime? value;
-  final bool hasError;
-  final ValueChanged<DateTime> onDateSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
-    final displayText = value != null ? _formatDateId(value!) : 'Pilih tanggal lahir';
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant, fontWeight: FontWeight.w500),
-        ),
-        const SizedBox(height: 6),
-        InkWell(
-          onTap: () async {
-            final picked = await showDatePicker(
-              context: context,
-              initialDate: value ?? DateTime(1995),
-              firstDate: DateTime(1940),
-              lastDate: DateTime.now().subtract(const Duration(days: 365 * 17)),
-              helpText: 'Pilih Tanggal Lahir',
-            );
-            if (picked != null) onDateSelected(picked);
-          },
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: hasError ? cs.error : (value != null ? cs.primary : cs.outline),
-                width: value != null ? 2 : 1,
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.calendar_today_outlined,
-                  size: 20,
-                  color: hasError ? cs.error : (value != null ? cs.primary : cs.onSurfaceVariant),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    displayText,
-                    style: tt.bodyMedium?.copyWith(
-                      color: value != null ? cs.onSurface : cs.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                Icon(Icons.arrow_drop_down, color: cs.onSurfaceVariant),
-              ],
-            ),
-          ),
-        ),
-        if (hasError) ...[
-          const SizedBox(height: 4),
-          Padding(
-            padding: const EdgeInsets.only(left: 4),
-            child: Text(
-              'Tanggal lahir wajib diisi',
-              style: tt.bodySmall?.copyWith(color: cs.error),
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-}
+// ── Gender Selector ───────────────────────────────────────────────────────────
 
 // ── Gender Selector ───────────────────────────────────────────────────────────
 

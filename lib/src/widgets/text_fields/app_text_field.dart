@@ -57,6 +57,10 @@ class AppTextField extends StatefulWidget {
   /// Keyboard type — defaults to [TextInputType.text].
   final TextInputType keyboardType;
 
+  /// Horizontal alignment for the editable text.
+  /// Use [TextAlign.right] for currency or numeric fields when needed.
+  final TextAlign textAlign;
+
   /// Input action for the IME action button.
   final TextInputAction textInputAction;
 
@@ -115,6 +119,7 @@ class AppTextField extends StatefulWidget {
     this.suffixIcon,
     this.obscureText = false,
     this.keyboardType = TextInputType.text,
+    this.textAlign = TextAlign.start,
     this.textInputAction = TextInputAction.next,
     this.controller,
     this.focusNode,
@@ -206,6 +211,7 @@ class _AppTextFieldState extends State<AppTextField> {
     return InputDecoration(
       filled: true,
       fillColor: fillColor,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       hintText: widget.hint,
       hintStyle: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
       errorText: hasError ? widget.errorText : null,
@@ -214,6 +220,27 @@ class _AppTextFieldState extends State<AppTextField> {
       prefixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),
       suffixIcon: widget.obscureText || widget.suffixIcon != null ? _buildSuffix(context) : null,
       suffixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: hasError ? cs.error : cs.outline),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: hasError ? cs.error : cs.primary, width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: cs.error),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: cs.error, width: 2),
+      ),
+      disabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(color: cs.onSurface.withValues(alpha: 0.12)),
+      ),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
     );
   }
 
@@ -229,6 +256,7 @@ class _AppTextFieldState extends State<AppTextField> {
       focusNode: widget.focusNode,
       initialValue: widget.controller == null ? widget.initialValue : null,
       keyboardType: widget.keyboardType,
+      textAlign: widget.textAlign,
       textInputAction: widget.textInputAction,
       obscureText: _obscured,
       maxLines: widget.obscureText ? 1 : widget.maxLines,
