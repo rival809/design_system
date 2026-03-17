@@ -189,6 +189,26 @@ class _ButtonsSection extends StatelessWidget {
 
         const SizedBox(height: 28),
 
+        // ── Badge ───────────────────────────────────────────────────────────
+        Text('Badge', style: tt.titleSmall),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: const [
+            AppBadge(label: '1', variant: BadgeVariant.primary),
+            AppBadge(label: '1', variant: BadgeVariant.error),
+            AppBadge(label: '1', variant: BadgeVariant.onSecondaryContainer),
+            AppBadge(label: 'NEW', variant: BadgeVariant.primary),
+            AppBadge.dot(variant: BadgeVariant.primary),
+            AppBadge.dot(variant: BadgeVariant.error),
+            AppBadge.dot(variant: BadgeVariant.onSecondaryContainer),
+          ],
+        ),
+
+        const SizedBox(height: 28),
+
         // ── Loading ───────────────────────────────────────────────────────────
         Text('Loading', style: tt.titleSmall),
         const SizedBox(height: 12),
