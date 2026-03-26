@@ -9,6 +9,7 @@ import '../../pages/dialogs_page.dart';
 import '../../pages/form_page.dart';
 import '../../pages/inputs_page.dart';
 import '../../pages/section_messages_page.dart';
+import '../../pages/tabs_page.dart';
 import '../../pages/typography_page.dart';
 import '../di/injection_container.dart';
 import '../theme/theme_notifier.dart';
@@ -37,6 +38,9 @@ final GoRouter appRouter = GoRouter(
         ),
         StatefulShellBranch(
           routes: [GoRoute(path: RoutePaths.buttons, builder: (_, __) => const ButtonsPage())],
+        ),
+        StatefulShellBranch(
+          routes: [GoRoute(path: RoutePaths.tabs, builder: (_, __) => const TabsPage())],
         ),
         StatefulShellBranch(
           routes: [
@@ -78,6 +82,7 @@ class ShowcaseShell extends StatelessWidget {
     (icon: Icons.palette_outlined, selectedIcon: Icons.palette, label: 'Colors'),
     (icon: Icons.text_fields_outlined, selectedIcon: Icons.text_fields, label: 'Typography'),
     (icon: Icons.smart_button_outlined, selectedIcon: Icons.smart_button, label: 'Buttons'),
+    (icon: Icons.tab_outlined, selectedIcon: Icons.tab, label: 'Tabs'),
     (icon: Icons.segment_outlined, selectedIcon: Icons.segment, label: 'Section Messages'),
     (icon: Icons.input_outlined, selectedIcon: Icons.input, label: 'Inputs'),
     (icon: Icons.chat_bubble_outline, selectedIcon: Icons.chat_bubble, label: 'Dialogs'),
