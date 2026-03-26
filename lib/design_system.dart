@@ -18,3 +18,4 @@ export 'src/widgets/badges/app_badge.dart';
 export 'src/widgets/chips/app_chip.dart';
 export 'src/widgets/section_messages/app_section_message.dart';
 export 'src/widgets/tabs/app_tab.dart';
+export 'src/widgets/tables/app_base_table.dart';

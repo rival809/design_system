@@ -74,6 +74,9 @@ class AppSearchableDropdown<T> extends StatelessWidget {
   /// Whether the field is interactive.
   final bool enabled;
 
+  /// Whether to show the outer field border.
+  final bool showBorder;
+
   /// Hint shown inside the search box in the popup.
   final String searchHint;
 
@@ -93,6 +96,7 @@ class AppSearchableDropdown<T> extends StatelessWidget {
     this.validator,
     this.prefixIcon,
     this.enabled = true,
+    this.showBorder = true,
     this.searchHint = 'Cari...',
   }) : assert(items != null || asyncItems != null, 'Provide either items or asyncItems');
 
@@ -103,6 +107,16 @@ class AppSearchableDropdown<T> extends StatelessWidget {
 
     final hasError = errorText != null && errorText!.isNotEmpty;
     final fillColor = enabled ? cs.surface : cs.onSurface.withValues(alpha: 0.12);
+    final borderSide = showBorder
+        ? BorderSide(color: hasError ? cs.error : cs.outline)
+        : BorderSide.none;
+    final focusedBorderSide = showBorder
+        ? BorderSide(color: hasError ? cs.error : cs.primary, width: 2)
+        : BorderSide.none;
+    final errorBorderSide = showBorder ? BorderSide(color: cs.error) : BorderSide.none;
+    final disabledBorderSide = showBorder
+        ? BorderSide(color: cs.onSurface.withValues(alpha: 0.12))
+        : BorderSide.none;
 
     // ── InputDecoration — mirrors AppTextField style ─────────────────────────
     final decoration = InputDecoration(
@@ -127,29 +141,31 @@ class AppSearchableDropdown<T> extends StatelessWidget {
       prefixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: hasError ? cs.error : cs.outline),
+        borderSide: borderSide,
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: hasError ? cs.error : cs.primary, width: 2),
+        borderSide: focusedBorderSide,
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: cs.error),
+        borderSide: errorBorderSide,
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: cs.error, width: 2),
+        borderSide: showBorder ? BorderSide(color: cs.error, width: 2) : BorderSide.none,
       ),
       disabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: cs.onSurface.withValues(alpha: 0.12)),
+        borderSide: disabledBorderSide,
       ),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
     );
 
     // ── Popup props ──────────────────────────────────────────────────────────
     final popupProps = PopupProps<T>.menu(
+      fit: FlexFit.loose,
+      constraints: const BoxConstraints(maxHeight: 400),
       showSearchBox: true,
       showSelectedItems: true,
       searchDelay: const Duration(milliseconds: 300),

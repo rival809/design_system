@@ -6,6 +6,7 @@ abstract final class RoutePaths {
   static const String buttons = '/buttons';
   static const String sectionMessages = '/section-messages';
   static const String tabs = '/tabs';
+  static const String table = '/table';
   static const String inputs = '/inputs';
   static const String dialogs = '/dialogs';
   static const String form = '/form';
