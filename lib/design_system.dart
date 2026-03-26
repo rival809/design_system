@@ -20,3 +20,4 @@ export 'src/widgets/section_messages/app_section_message.dart';
 export 'src/widgets/tabs/app_tab.dart';
 export 'src/widgets/tables/app_base_table.dart';
 export 'src/widgets/tables/app_table_search_form.dart';
+export 'src/widgets/layout/app_adaptive_layout.dart';

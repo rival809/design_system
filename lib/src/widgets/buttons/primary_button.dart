@@ -59,10 +59,16 @@ enum ButtonSize {
 ///   isLoading: true,
 ///   onPressed: null,
 /// )
+///
+/// // Icon only button
+/// PrimaryButton(
+///   leadingIcon: const Icon(Icons.send),
+///   onPressed: () {},
+/// )
 /// ```
 class PrimaryButton extends StatelessWidget {
-  /// Text displayed inside the button.
-  final String label;
+  /// Text displayed inside the button. Optional for icon-only buttons.
+  final String? label;
 
   /// Callback invoked when the button is tapped. If `null`, the button is
   /// rendered in a disabled state.
@@ -90,7 +96,7 @@ class PrimaryButton extends StatelessWidget {
 
   const PrimaryButton({
     super.key,
-    required this.label,
+    this.label,
     this.onPressed,
     this.variant = ButtonVariant.filled,
     this.size = ButtonSize.medium,
@@ -104,11 +110,14 @@ class PrimaryButton extends StatelessWidget {
   // Size helpers
   // ---------------------------------------------------------------------------
 
-  EdgeInsetsGeometry get _padding => switch (size) {
-    ButtonSize.small => const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    ButtonSize.medium => const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-    ButtonSize.large => const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
-  };
+  EdgeInsetsGeometry get _padding {
+    final isIconOnly = label == null || label!.isEmpty;
+    return switch (size) {
+      ButtonSize.small => EdgeInsets.symmetric(horizontal: isIconOnly ? 8 : 16, vertical: 8),
+      ButtonSize.medium => EdgeInsets.symmetric(horizontal: isIconOnly ? 14 : 24, vertical: 14),
+      ButtonSize.large => EdgeInsets.symmetric(horizontal: isIconOnly ? 18 : 32, vertical: 18),
+    };
+  }
 
   double get _fontSize => switch (size) {
     ButtonSize.small => 12,
@@ -204,9 +213,9 @@ class PrimaryButton extends StatelessWidget {
         fontSize: _fontSize,
         loaderSize: _loaderSize,
         isLoading: isLoading,
+        colorScheme: colorScheme,
         leadingIcon: leadingIcon,
         trailingIcon: trailingIcon,
-        colorScheme: colorScheme,
       ),
     };
 
@@ -224,7 +233,7 @@ class PrimaryButton extends StatelessWidget {
 
 class _ButtonContent extends StatelessWidget {
   const _ButtonContent({
-    required this.label,
+    this.label,
     required this.isLoading,
     required this.loaderSize,
     required this.loaderColor,
@@ -235,18 +244,14 @@ class _ButtonContent extends StatelessWidget {
     this.textStyle,
   });
 
-  final String label;
+  final String? label;
   final bool isLoading;
   final double loaderSize;
   final Color loaderColor;
   final double fontSize;
   final Widget? leadingIcon;
   final Widget? trailingIcon;
-
-  /// When set, wraps content in a [DefaultTextStyle] + [IconTheme] with this color.
   final Color? overrideColor;
-
-  /// When set, overrides the text style (e.g. for underline in link).
   final TextStyle? textStyle;
 
   @override
@@ -262,18 +267,37 @@ class _ButtonContent extends StatelessWidget {
       );
     }
 
+    final hasLabel = label != null && label!.isNotEmpty;
+    
     Widget content;
-    if (leadingIcon == null && trailingIcon == null) {
-      content = Text(label, style: textStyle);
+    if (!hasLabel) {
+      // Icon only implementation
+      if (leadingIcon != null && trailingIcon != null) {
+        content = Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [leadingIcon!, const SizedBox(width: 8), trailingIcon!],
+        );
+      } else if (leadingIcon != null) {
+        content = leadingIcon!;
+      } else if (trailingIcon != null) {
+        content = trailingIcon!;
+      } else {
+        content = const SizedBox.shrink();
+      }
     } else {
-      content = Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (leadingIcon != null) ...[leadingIcon!, const SizedBox(width: 8)],
-          Text(label, style: textStyle),
-          if (trailingIcon != null) ...[const SizedBox(width: 8), trailingIcon!],
-        ],
-      );
+      // Label with optional icons
+      if (leadingIcon == null && trailingIcon == null) {
+        content = Text(label!, style: textStyle);
+      } else {
+        content = Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (leadingIcon != null) ...[leadingIcon!, const SizedBox(width: 8)],
+            Text(label!, style: textStyle),
+            if (trailingIcon != null) ...[const SizedBox(width: 8), trailingIcon!],
+          ],
+        );
+      }
     }
 
     if (overrideColor != null) {
@@ -292,7 +316,7 @@ class _ButtonContent extends StatelessWidget {
 
 class _FilledButton extends StatelessWidget {
   const _FilledButton({
-    required this.label,
+    this.label,
     required this.onPressed,
     required this.padding,
     required this.fontSize,
@@ -303,7 +327,7 @@ class _FilledButton extends StatelessWidget {
     this.trailingIcon,
   });
 
-  final String label;
+  final String? label;
   final VoidCallback? onPressed;
   final EdgeInsetsGeometry padding;
   final double fontSize;
@@ -327,6 +351,7 @@ class _FilledButton extends StatelessWidget {
         elevation: 0,
         shadowColor: Colors.transparent,
         padding: padding,
+        minimumSize: Size.zero,
         textStyle: labelStyle,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
@@ -345,7 +370,7 @@ class _FilledButton extends StatelessWidget {
 
 class _OutlinedButtonWidget extends StatelessWidget {
   const _OutlinedButtonWidget({
-    required this.label,
+    this.label,
     required this.onPressed,
     required this.padding,
     required this.fontSize,
@@ -356,7 +381,7 @@ class _OutlinedButtonWidget extends StatelessWidget {
     this.trailingIcon,
   });
 
-  final String label;
+  final String? label;
   final VoidCallback? onPressed;
   final EdgeInsetsGeometry padding;
   final double fontSize;
@@ -381,6 +406,7 @@ class _OutlinedButtonWidget extends StatelessWidget {
               : cs.primary,
         ),
         padding: padding,
+        minimumSize: Size.zero,
         textStyle: labelStyle,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
@@ -399,7 +425,7 @@ class _OutlinedButtonWidget extends StatelessWidget {
 
 class _TextButtonWidget extends StatelessWidget {
   const _TextButtonWidget({
-    required this.label,
+    this.label,
     required this.onPressed,
     required this.padding,
     required this.fontSize,
@@ -410,7 +436,7 @@ class _TextButtonWidget extends StatelessWidget {
     this.trailingIcon,
   });
 
-  final String label;
+  final String? label;
   final VoidCallback? onPressed;
   final EdgeInsetsGeometry padding;
   final double fontSize;
@@ -429,6 +455,7 @@ class _TextButtonWidget extends StatelessWidget {
         foregroundColor: colorScheme.primary,
         disabledForegroundColor: colorScheme.onSurface.withValues(alpha: 0.38),
         padding: padding,
+        minimumSize: Size.zero,
         textStyle: labelStyle,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
@@ -451,7 +478,7 @@ class _TextButtonWidget extends StatelessWidget {
 
 class _SecondaryButton extends StatelessWidget {
   const _SecondaryButton({
-    required this.label,
+    this.label,
     required this.onPressed,
     required this.padding,
     required this.fontSize,
@@ -462,7 +489,7 @@ class _SecondaryButton extends StatelessWidget {
     this.trailingIcon,
   });
 
-  final String label;
+  final String? label;
   final VoidCallback? onPressed;
   final EdgeInsetsGeometry padding;
   final double fontSize;
@@ -487,6 +514,7 @@ class _SecondaryButton extends StatelessWidget {
               : cs.secondary,
         ),
         padding: padding,
+        minimumSize: Size.zero,
         textStyle: labelStyle,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
@@ -509,7 +537,7 @@ class _SecondaryButton extends StatelessWidget {
 
 class _DangerButton extends StatelessWidget {
   const _DangerButton({
-    required this.label,
+    this.label,
     required this.onPressed,
     required this.padding,
     required this.fontSize,
@@ -520,7 +548,7 @@ class _DangerButton extends StatelessWidget {
     this.trailingIcon,
   });
 
-  final String label;
+  final String? label;
   final VoidCallback? onPressed;
   final EdgeInsetsGeometry padding;
   final double fontSize;
@@ -544,6 +572,7 @@ class _DangerButton extends StatelessWidget {
         elevation: 0,
         shadowColor: Colors.transparent,
         padding: padding,
+        minimumSize: Size.zero,
         textStyle: labelStyle,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
@@ -566,7 +595,7 @@ class _DangerButton extends StatelessWidget {
 
 class _TertiaryButton extends StatelessWidget {
   const _TertiaryButton({
-    required this.label,
+    this.label,
     required this.onPressed,
     required this.padding,
     required this.fontSize,
@@ -577,7 +606,7 @@ class _TertiaryButton extends StatelessWidget {
     this.trailingIcon,
   });
 
-  final String label;
+  final String? label;
   final VoidCallback? onPressed;
   final EdgeInsetsGeometry padding;
   final double fontSize;
@@ -597,6 +626,7 @@ class _TertiaryButton extends StatelessWidget {
         foregroundColor: cs.primary,
         disabledForegroundColor: cs.onSurface.withValues(alpha: 0.38),
         padding: padding,
+        minimumSize: Size.zero,
         textStyle: labelStyle,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
@@ -619,7 +649,7 @@ class _TertiaryButton extends StatelessWidget {
 
 class _LinkButton extends StatelessWidget {
   const _LinkButton({
-    required this.label,
+    this.label,
     required this.onPressed,
     required this.padding,
     required this.fontSize,
@@ -630,7 +660,7 @@ class _LinkButton extends StatelessWidget {
     this.trailingIcon,
   });
 
-  final String label;
+  final String? label;
   final VoidCallback? onPressed;
   final EdgeInsetsGeometry padding;
   final double fontSize;

@@ -42,7 +42,7 @@ class AppTextField extends StatefulWidget {
 
   /// Widget placed inside the field prefix area.
   /// Accepts any widget: [Icon], [SvgPicture], or a fully custom widget.
-  /// It is automatically sized (48×field-height) and centered.
+  /// It is automatically sized (40×field-height) and centered.
   final Widget? prefixIcon;
 
   /// Widget placed inside the field suffix area.
@@ -78,6 +78,9 @@ class AppTextField extends StatefulWidget {
 
   /// Called when focus leaves the field.
   final VoidCallback? onTapOutside;
+
+  /// Called when the user taps on the field.
+  final GestureTapCallback? onTap;
 
   /// Validation callback used in a [Form] context.
   final FormFieldValidator<String>? validator;
@@ -126,6 +129,7 @@ class AppTextField extends StatefulWidget {
     this.onChanged,
     this.onSubmitted,
     this.onTapOutside,
+    this.onTap,
     this.validator,
     this.inputFormatters,
     this.maxLines = 1,
@@ -168,14 +172,18 @@ class _AppTextFieldState extends State<AppTextField> {
   // ---------------------------------------------------------------------------
 
   Widget _wrapAdornment(BuildContext context, Widget child) {
-    return SizedBox(
-      width: 48,
-      child: Center(
+    if (child is Icon) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         child: IconTheme(
           data: IconThemeData(color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
           child: child,
         ),
-      ),
+      );
+    }
+    return IconTheme(
+      data: IconThemeData(color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
+      child: Center(widthFactor: 1.0, child: child),
     );
   }
 
@@ -217,9 +225,7 @@ class _AppTextFieldState extends State<AppTextField> {
       errorText: hasError ? widget.errorText : null,
       errorStyle: tt.bodySmall?.copyWith(color: cs.error),
       prefixIcon: widget.prefixIcon != null ? _wrapAdornment(context, widget.prefixIcon!) : null,
-      prefixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),
       suffixIcon: widget.obscureText || widget.suffixIcon != null ? _buildSuffix(context) : null,
-      suffixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide(color: hasError ? cs.error : cs.outline),
@@ -272,6 +278,7 @@ class _AppTextFieldState extends State<AppTextField> {
       cursorColor: cs.primary,
       onChanged: widget.onChanged,
       onFieldSubmitted: widget.onSubmitted,
+      onTap: widget.onTap,
       onTapOutside: widget.onTapOutside != null
           ? (_) => widget.onTapOutside!()
           : (_) => FocusScope.of(context).unfocus(),

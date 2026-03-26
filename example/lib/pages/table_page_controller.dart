@@ -27,13 +27,15 @@ class TablePageController extends ChangeNotifier {
   int _rowsPerPage = 10;
   ActionMode _actionMode = ActionMode.singleButton;
   bool _isLoading = true;
+  bool _isLoadingMore = false; // Indicator specifically for mobile lazy load
   String? _errorMessage;
   int _requestCounter = 0;
   bool _isDisposed = false;
 
   // Hasil dari API — di-set setiap kali fetchPage() selesai.
   List<AppBaseTableKey> _apiKeys = const [];
-  List<Map<String, dynamic>> _serverItems = const [];
+  List<Map<String, dynamic>> _serverItems = const []; // Desktop replaces this
+  final List<Map<String, dynamic>> _mobileItems = []; // Mobile appends to this
   int _totalRows = 0;
   int _maxPage = 1;
 
@@ -49,8 +51,10 @@ class TablePageController extends ChangeNotifier {
   int get rowsPerPage => _rowsPerPage;
   ActionMode get actionMode => _actionMode;
   bool get isLoading => _isLoading;
+  bool get isLoadingMore => _isLoadingMore;
   String? get errorMessage => _errorMessage;
   List<Map<String, dynamic>> get serverItems => _serverItems;
+  List<Map<String, dynamic>> get mobileItems => UnmodifiableListView(_mobileItems);
   List<AppBaseTableKey> get searchKeys => _apiKeys;
   List<String> get allKeys => _apiKeys.map((e) => e.key).toList();
   Set<String> get visibleKeys => UnmodifiableSetView(_visibleKeys);
@@ -78,9 +82,14 @@ class TablePageController extends ChangeNotifier {
     await fetchPage();
   }
 
-  Future<void> fetchPage() async {
+  Future<void> fetchPage({bool isLoadMore = false}) async {
     final requestId = ++_requestCounter;
-    _isLoading = true;
+    
+    if (isLoadMore) {
+      _isLoadingMore = true;
+    } else {
+      _isLoading = true;
+    }
     _errorMessage = null;
     notifyListeners();
 
@@ -105,6 +114,11 @@ class TablePageController extends ChangeNotifier {
       _serverItems = result.items;
       _totalRows = result.totalRows;
       _maxPage = result.maxPage;
+
+      if (_currentPage == 1) {
+        _mobileItems.clear();
+      }
+      _mobileItems.addAll(result.items);
     } on DioException catch (e) {
       if (_isDisposed || requestId != _requestCounter) return;
       _errorMessage = e.message ?? 'Terjadi kesalahan jaringan';
@@ -114,6 +128,7 @@ class TablePageController extends ChangeNotifier {
     } finally {
       if (!_isDisposed && requestId == _requestCounter) {
         _isLoading = false;
+        _isLoadingMore = false;
         notifyListeners();
       }
     }
@@ -167,6 +182,13 @@ class TablePageController extends ChangeNotifier {
   Future<void> changePage(int value) async {
     _currentPage = value.clamp(1, _maxPage);
     await fetchPage();
+  }
+
+  /// Khusus untuk mobile: append data halaman berikutnya ke list akhir.
+  Future<void> loadNextPageMobile() async {
+    if (_isLoading || _isLoadingMore || _currentPage >= _maxPage) return;
+    _currentPage++;
+    await fetchPage(isLoadMore: true);
   }
 
   // ─── Dispose ───────────────────────────────────────────────────────────────

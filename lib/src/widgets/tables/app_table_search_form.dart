@@ -30,6 +30,7 @@ class AppTableSearchForm extends StatefulWidget {
     this.initialVisibleKeys,
     this.onSubmit,
     this.onReset,
+    this.hugContent = false,
   });
 
   final List<AppBaseTableKey> keys;
@@ -42,6 +43,7 @@ class AppTableSearchForm extends StatefulWidget {
   final List<String>? initialVisibleKeys;
   final AppTableSearchSubmit? onSubmit;
   final VoidCallback? onReset;
+  final bool hugContent;
 
   @override
   State<AppTableSearchForm> createState() => _AppTableSearchFormState();
@@ -192,6 +194,7 @@ class _AppTableSearchFormState extends State<AppTableSearchForm> {
       color: cs.surface,
       padding: const EdgeInsets.all(20),
       child: Column(
+        mainAxisSize: widget.hugContent ? MainAxisSize.min : MainAxisSize.max,
         children: [
           Row(
             children: [
@@ -205,7 +208,8 @@ class _AppTableSearchFormState extends State<AppTableSearchForm> {
             ],
           ),
           const SizedBox(height: 12),
-          Expanded(
+          Flexible(
+            fit: widget.hugContent ? FlexFit.loose : FlexFit.tight,
             child: SingleChildScrollView(
               child: Column(
                 children: [
