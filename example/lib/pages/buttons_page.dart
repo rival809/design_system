@@ -209,6 +209,23 @@ class _ButtonsSection extends StatelessWidget {
 
         const SizedBox(height: 28),
 
+        // ── Chips ───────────────────────────────────────────────────────────
+        Text('Chips', style: tt.titleSmall),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: const [
+            AppChip(label: 'Data Table', variant: ChipVariant.blue),
+            AppChip(label: 'Data Table', variant: ChipVariant.green),
+            AppChip(label: 'Data Table', variant: ChipVariant.red),
+            AppChip(label: 'Data Table', variant: ChipVariant.yellow),
+          ],
+        ),
+
+        const SizedBox(height: 28),
+
         // ── Loading ───────────────────────────────────────────────────────────
         Text('Loading', style: tt.titleSmall),
         const SizedBox(height: 12),
