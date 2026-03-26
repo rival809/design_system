@@ -4,6 +4,7 @@ abstract final class RoutePaths {
   static const String colors = '/colors';
   static const String typography = '/typography';
   static const String buttons = '/buttons';
+  static const String sectionMessages = '/section-messages';
   static const String inputs = '/inputs';
   static const String dialogs = '/dialogs';
   static const String form = '/form';
