@@ -13,16 +13,39 @@ class TablePageController extends ChangeNotifier {
   int _requestCounter = 0;
   bool _isDisposed = false;
   List<Map<String, dynamic>> _serverItems = const [];
+  List<AppTableSearchRule> _searchRules = const [];
 
-  static const List<String> _allKeys = [
-    'nama',
-    'nip',
-    'bidang',
-    'pangkat_golongan',
-    'no_whatsapp',
-    'status',
-    'aksi',
+  static const List<String> _supportedMethods = [
+    '=',
+    '>=',
+    '<=',
+    '<',
+    '>',
+    'LIKE',
+    '!=',
+    'IN',
+    'NOT IN',
   ];
+
+  static const List<AppBaseTableKey> _searchKeys = [
+    AppBaseTableKey(key: 'nama', method: _supportedMethods, helper: ['Masukkan nama']),
+    AppBaseTableKey(key: 'nip', method: _supportedMethods, helper: ['Masukkan email / NIP']),
+    AppBaseTableKey(key: 'bidang', method: _supportedMethods, helper: ['Masukkan kode bidang']),
+    AppBaseTableKey(
+      key: 'pangkat_golongan',
+      method: _supportedMethods,
+      helper: ['Masukkan pangkat atau golongan'],
+    ),
+    AppBaseTableKey(
+      key: 'no_whatsapp',
+      method: _supportedMethods,
+      helper: ['Masukkan nomor WhatsApp'],
+    ),
+    AppBaseTableKey(key: 'status', method: _supportedMethods, helper: ['Masukkan status']),
+    AppBaseTableKey(key: 'aksi', method: _supportedMethods, helper: ['Masukkan label aksi']),
+  ];
+
+  static final List<String> _allKeys = _searchKeys.map((e) => e.key).toList();
 
   final Set<String> _visibleKeys = {..._allKeys};
 
@@ -46,16 +69,18 @@ class TablePageController extends ChangeNotifier {
   bool get isLoading => _isLoading;
   List<Map<String, dynamic>> get serverItems => _serverItems;
   List<String> get allKeys => _allKeys;
+  List<AppBaseTableKey> get searchKeys => _searchKeys;
   Set<String> get visibleKeys => UnmodifiableSetView(_visibleKeys);
+  List<AppTableSearchRule> get searchRules => _searchRules;
 
-  int get maxPage => (_expandedItems.length / _rowsPerPage).ceil().clamp(1, 9999);
+  int get maxPage => (_filteredItems.length / _rowsPerPage).ceil().clamp(1, 9999);
 
   AppBaseTableData get tableData {
     final keys = _allKeys.where(_visibleKeys.contains).toList();
     return AppBaseTableData(
       keys: keys.map((key) => AppBaseTableKey(key: key)).toList(),
       items: _serverItems,
-      totalRows: _expandedItems.length,
+      totalRows: _filteredItems.length,
       maxPage: maxPage,
       currentPage: _currentPage,
     );
@@ -75,11 +100,12 @@ class TablePageController extends ChangeNotifier {
 
     if (_isDisposed || requestId != _requestCounter) return;
 
+    final sourceItems = _filteredItems;
     final start = (_currentPage - 1) * _rowsPerPage;
-    final end = (start + _rowsPerPage).clamp(0, _expandedItems.length);
-    final pageItems = start >= _expandedItems.length
+    final end = (start + _rowsPerPage).clamp(0, sourceItems.length);
+    final pageItems = start >= sourceItems.length
         ? <Map<String, dynamic>>[]
-        : _expandedItems.sublist(start, end);
+        : sourceItems.sublist(start, end);
 
     _serverItems = pageItems;
     _isLoading = false;
@@ -101,6 +127,30 @@ class TablePageController extends ChangeNotifier {
       _visibleKeys.add(key);
     }
     notifyListeners();
+  }
+
+  Future<void> applySearch({
+    required List<AppTableSearchRule> rules,
+    required List<String> visibleKeys,
+  }) async {
+    final normalizedVisibleKeys = visibleKeys.where(_allKeys.contains).toList();
+    _searchRules = rules;
+    _visibleKeys
+      ..clear()
+      ..addAll(normalizedVisibleKeys.isEmpty ? _allKeys : normalizedVisibleKeys);
+    _currentPage = 1;
+    notifyListeners();
+    await fakeFetchPage();
+  }
+
+  Future<void> resetSearch() async {
+    _searchRules = const [];
+    _visibleKeys
+      ..clear()
+      ..addAll(_allKeys);
+    _currentPage = 1;
+    notifyListeners();
+    await fakeFetchPage();
   }
 
   String labelForKey(String key) {
@@ -142,6 +192,61 @@ class TablePageController extends ChangeNotifier {
   }
 
   List<Map<String, dynamic>> get _expandedItems => _apiItems.map(_toViewItem).toList();
+
+  List<Map<String, dynamic>> get _filteredItems {
+    if (_searchRules.isEmpty) return _expandedItems;
+    return _expandedItems.where(_matchesAllRules).toList();
+  }
+
+  bool _matchesAllRules(Map<String, dynamic> item) {
+    for (final rule in _searchRules) {
+      final raw = (item[rule.key] ?? '').toString();
+      final value = rule.value.trim();
+      if (value.isEmpty) continue;
+      final source = raw.toLowerCase();
+      final query = value.toLowerCase();
+      final method = rule.method.trim().toLowerCase();
+      final compareValue = _compareValues(raw, value);
+
+      final matched = switch (method) {
+        'like' => source.contains(query),
+        'in' => _splitListValue(value).contains(source),
+        'not in' => !_splitListValue(value).contains(source),
+        '>' => compareValue != null && compareValue > 0,
+        '>=' => compareValue != null && compareValue >= 0,
+        '<' => compareValue != null && compareValue < 0,
+        '<=' => compareValue != null && compareValue <= 0,
+        '!=' || '<>' => source != query,
+        _ => source == query,
+      };
+      if (!matched) return false;
+    }
+    return true;
+  }
+
+  int? _compareValues(String source, String query) {
+    final sourceNum = double.tryParse(source.trim());
+    final queryNum = double.tryParse(query.trim());
+    if (sourceNum != null && queryNum != null) {
+      return sourceNum.compareTo(queryNum);
+    }
+
+    final sourceDate = DateTime.tryParse(source.trim());
+    final queryDate = DateTime.tryParse(query.trim());
+    if (sourceDate != null && queryDate != null) {
+      return sourceDate.compareTo(queryDate);
+    }
+
+    return source.toLowerCase().compareTo(query.toLowerCase());
+  }
+
+  Set<String> _splitListValue(String value) {
+    return value
+        .split(RegExp(r'[,;]'))
+        .map((e) => e.trim().toLowerCase())
+        .where((e) => e.isNotEmpty)
+        .toSet();
+  }
 
   List<Map<String, dynamic>> get _apiItems {
     return List<Map<String, dynamic>>.generate(12, (index) {

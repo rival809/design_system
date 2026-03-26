@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 // Re-export so callers don't need to import dropdown_search directly.
 export 'package:dropdown_search/dropdown_search.dart' show DropdownSearchOnFind;
 
+/// Controls whether dropdown text stays on one line or can wrap to multiple lines.
+enum AppDropdownTextMode { singleLine, multiLine }
+
 /// A theme-aware searchable dropdown widget built on top of [DropdownSearch].
 ///
 /// Renders identically to [AppTextField] — same border radius, typography,
@@ -80,6 +83,12 @@ class AppSearchableDropdown<T> extends StatelessWidget {
   /// Hint shown inside the search box in the popup.
   final String searchHint;
 
+  /// Text mode for selected value shown in the closed field.
+  final AppDropdownTextMode selectedTextMode;
+
+  /// Text mode for popup item labels.
+  final AppDropdownTextMode popupItemTextMode;
+
   const AppSearchableDropdown({
     super.key,
     this.label,
@@ -98,6 +107,8 @@ class AppSearchableDropdown<T> extends StatelessWidget {
     this.enabled = true,
     this.showBorder = true,
     this.searchHint = 'Cari...',
+    this.selectedTextMode = AppDropdownTextMode.multiLine,
+    this.popupItemTextMode = AppDropdownTextMode.multiLine,
   }) : assert(items != null || asyncItems != null, 'Provide either items or asyncItems');
 
   @override
@@ -197,6 +208,10 @@ class AppSearchableDropdown<T> extends StatelessWidget {
           dense: true,
           title: Text(
             label,
+            maxLines: popupItemTextMode == AppDropdownTextMode.singleLine ? 1 : null,
+            overflow: popupItemTextMode == AppDropdownTextMode.singleLine
+                ? TextOverflow.ellipsis
+                : TextOverflow.visible,
             style: tt.bodySmall?.copyWith(
               color: isSelected ? cs.primary : cs.onSurface,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
@@ -233,6 +248,28 @@ class AppSearchableDropdown<T> extends StatelessWidget {
       validator: validator,
       onChanged: onChanged,
       popupProps: popupProps,
+      dropdownBuilder: (context, selected) {
+        if (selected == null) {
+          return Text(
+            hint ?? '',
+            maxLines: selectedTextMode == AppDropdownTextMode.singleLine ? 1 : null,
+            overflow: selectedTextMode == AppDropdownTextMode.singleLine
+                ? TextOverflow.ellipsis
+                : TextOverflow.visible,
+            style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+          );
+        }
+
+        final label = itemAsString != null ? itemAsString!(selected) : selected.toString();
+        return Text(
+          label,
+          maxLines: selectedTextMode == AppDropdownTextMode.singleLine ? 1 : null,
+          overflow: selectedTextMode == AppDropdownTextMode.singleLine
+              ? TextOverflow.ellipsis
+              : TextOverflow.visible,
+          style: tt.bodySmall?.copyWith(color: cs.onSurface),
+        );
+      },
       dropdownButtonProps: DropdownButtonProps(
         icon: Icon(Icons.arrow_drop_down_rounded, color: cs.onSurfaceVariant, size: 24),
       ),

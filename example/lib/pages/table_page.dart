@@ -12,6 +12,7 @@ class TablePage extends StatefulWidget {
 }
 
 class _TablePageState extends State<TablePage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late final TablePageController _controller;
 
   @override
@@ -31,6 +32,39 @@ class _TablePageState extends State<TablePage> {
   void _onControllerChanged() {
     if (!mounted) return;
     setState(() {});
+  }
+
+  bool _isDesktop(BuildContext context) => MediaQuery.of(context).size.width >= 992;
+
+  Future<void> _openSearchForm() async {
+    if (_isDesktop(context)) {
+      _scaffoldKey.currentState?.openEndDrawer();
+      return;
+    }
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (sheetContext) {
+        final maxHeight = MediaQuery.of(sheetContext).size.height * 0.92;
+        return SizedBox(
+          height: maxHeight,
+          child: AppTableSearchForm(
+            keys: _controller.searchKeys,
+            initialVisibleKeys: _controller.visibleKeys.toList(),
+            onSubmit: (rules, visibleKeys) async {
+              await _controller.applySearch(rules: rules, visibleKeys: visibleKeys);
+              if (!sheetContext.mounted) return;
+              Navigator.of(sheetContext).pop();
+            },
+            onReset: () {
+              _controller.resetSearch();
+            },
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildActionRenderer(TrinaColumnRendererContext ctx) {
@@ -92,61 +126,76 @@ class _TablePageState extends State<TablePage> {
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Base Table', style: tt.titleSmall),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              PopupMenuButton<String>(
-                tooltip: 'Pilih kolom',
-                onSelected: _controller.toggleVisibleColumn,
-                itemBuilder: (context) => [
-                  for (final key in _controller.allKeys)
-                    CheckedPopupMenuItem<String>(
-                      value: key,
-                      checked: _controller.visibleKeys.contains(key),
-                      child: Text(_controller.labelForKey(key)),
-                    ),
-                ],
-                child: IgnorePointer(
-                  child: PrimaryButton(
-                    label: 'Kolom Tampil (${_controller.visibleKeys.length})',
-                    variant: ButtonVariant.outlined,
-                    size: ButtonSize.small,
-                    trailingIcon: const Icon(Icons.arrow_drop_down),
-                    onPressed: () {},
-                  ),
+    return Scaffold(
+      key: _scaffoldKey,
+      endDrawer: _isDesktop(context)
+          ? SizedBox(
+              width: 460,
+              child: SafeArea(
+                child: AppTableSearchForm(
+                  keys: _controller.searchKeys,
+                  initialVisibleKeys: _controller.visibleKeys.toList(),
+                  onSubmit: (rules, visibleKeys) async {
+                    await _controller.applySearch(rules: rules, visibleKeys: visibleKeys);
+                    if (!mounted) return;
+                    Navigator.of(context).maybePop();
+                  },
+                  onReset: () {
+                    _controller.resetSearch();
+                  },
                 ),
               ),
-            ],
-          ),
-          if (_controller.isLoading) ...[
+            )
+          : null,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Base Table', style: tt.titleSmall),
             const SizedBox(height: 12),
-            const LinearProgressIndicator(),
-          ],
-          const SizedBox(height: 12),
-          AppBaseTable(
-            key: ValueKey(
-              'table-${_controller.currentPage}-${_controller.rowsPerPage}-${_controller.serverItems.length}-${_controller.visibleKeys.join(',')}-${_controller.isLoading}',
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                PrimaryButton(
+                  label: 'Filter Pencarian',
+                  variant: ButtonVariant.outlined,
+                  size: ButtonSize.small,
+                  leadingIcon: const Icon(Icons.filter_alt_outlined),
+                  onPressed: _openSearchForm,
+                ),
+                PrimaryButton(
+                  label: 'Reset Filter',
+                  variant: ButtonVariant.secondary,
+                  size: ButtonSize.small,
+                  onPressed: _controller.resetSearch,
+                ),
+                Text('Rules: ${_controller.searchRules.length}', style: tt.bodySmall),
+              ],
             ),
-            data: _controller.tableData,
-            height: MediaQuery.of(context).size.height - 400,
-            paginationMode: AppBaseTablePaginationMode.backend,
-            columnScaleMode: AppBaseTableColumnScaleMode.fill,
-            actionRenderer: _buildActionRenderer,
-            rowsPerPage: _controller.rowsPerPage,
-            rowsPerPageOptions: const [10],
-            onRowsPerPageChanged: _controller.changeRowsPerPage,
-            onPageChanged: _controller.changePage,
-          ),
-        ],
+            if (_controller.isLoading) ...[
+              const SizedBox(height: 12),
+              const LinearProgressIndicator(),
+            ],
+            const SizedBox(height: 12),
+            AppBaseTable(
+              key: ValueKey(
+                'table-${_controller.currentPage}-${_controller.rowsPerPage}-${_controller.serverItems.length}-${_controller.visibleKeys.join(',')}-${_controller.isLoading}-${_controller.searchRules.length}',
+              ),
+              data: _controller.tableData,
+              height: MediaQuery.of(context).size.height - 400,
+              paginationMode: AppBaseTablePaginationMode.backend,
+              columnScaleMode: AppBaseTableColumnScaleMode.fill,
+              actionRenderer: _buildActionRenderer,
+              rowsPerPage: _controller.rowsPerPage,
+              rowsPerPageOptions: const [10],
+              onRowsPerPageChanged: _controller.changeRowsPerPage,
+              onPageChanged: _controller.changePage,
+            ),
+          ],
+        ),
       ),
     );
   }
