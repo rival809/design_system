@@ -80,6 +80,7 @@ class AppPdfViewer extends StatefulWidget {
 
 class _AppPdfViewerState extends State<AppPdfViewer> {
   late final PdfViewerController _pdfController;
+  PdfTextSearcher? _searcher;
   int _currentPage = 0;
   int _pageCount = 0;
   double _currentZoom = 1.0;
@@ -96,11 +97,23 @@ class _AppPdfViewerState extends State<AppPdfViewer> {
     _pdfController.addListener(_onPdfCtrlChanged);
   }
 
+  void _onViewerReady(PdfDocument document, PdfViewerController controller) {
+    if (mounted && _searcher == null) {
+      _searcher = PdfTextSearcher(_pdfController);
+      _searcher!.addListener(_onSearchChanged);
+      setState(() {});
+    }
+  }
+
   @override
   void dispose() {
+    _searcher?.dispose();
     _pdfController.removeListener(_onPdfCtrlChanged);
-    // _pdfController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged() {
+    if (mounted) setState(() {});
   }
 
   void _onPdfCtrlChanged() {
@@ -134,6 +147,12 @@ class _AppPdfViewerState extends State<AppPdfViewer> {
       // enableTextSelection: true,
       maxScale: 8.0,
       backgroundColor: Colors.grey.shade300,
+      matchTextColor: Colors.yellow.withValues(alpha: 0.5),
+      activeMatchTextColor: Colors.orange.withValues(alpha: 0.5),
+      onViewerReady: _onViewerReady,
+      pagePaintCallbacks: [
+        if (_searcher != null) _searcher!.pageTextMatchPaintCallback,
+      ],
     );
 
     switch (widget.sourceType) {
@@ -169,14 +188,16 @@ class _AppPdfViewerState extends State<AppPdfViewer> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Evaluate toolbar visibility purely by configuration flag `hideToolbar`, 
+        // Evaluate toolbar visibility purely by configuration flag `hideToolbar`,
         // sidestepping internal parent width bounds that hide it under fractional Flex boxes.
         final showToolbar = !widget.hideToolbar;
 
         return Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_showSidePanel) AppPdfSidePanel(controller: _pdfController),
-            // Sisa area kanan PDF viewer (Toolbar + Konten) 
+            if (_showSidePanel && _searcher != null)
+              AppPdfSidePanel(controller: _pdfController, searcher: _searcher!),
+            // Sisa area kanan PDF viewer (Toolbar + Konten)
             Expanded(
               child: Column(
                 children: [

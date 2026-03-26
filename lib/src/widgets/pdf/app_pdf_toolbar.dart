@@ -59,9 +59,10 @@ class AppPdfToolbar extends StatelessWidget {
           data: const IconThemeData(color: Colors.white, size: 20),
           child: Row(
             children: [
-              // 1. Menu Icon
+              // 1. Menu Icon (Search)
               IconButton(
-                icon: const Icon(Icons.menu),
+                icon: const Icon(Icons.search),
+                tooltip: 'Search Document',
                 onPressed: onMenuPressed,
                 splashRadius: 20,
               ),
@@ -94,9 +95,9 @@ class AppPdfToolbar extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text('/  $pageCount'),
-                    
+
                     divider, // |
-                    
+
                     // 4. Zoom Controls (Combined here visually)
                     IconButton(
                       icon: const Icon(Icons.remove),
