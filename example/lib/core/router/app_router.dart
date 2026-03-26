@@ -6,6 +6,7 @@ import '../../features/user_registration/presentation/pages/user_list_page.dart'
 import '../../pages/buttons_page.dart';
 import '../../pages/colors_page.dart';
 import '../../pages/dialogs_page.dart';
+import '../../pages/pdf_example_page.dart';
 import '../../pages/form_page.dart';
 import '../../pages/inputs_page.dart';
 import '../../pages/section_messages_page.dart';
@@ -69,6 +70,7 @@ final GoRouter appRouter = GoRouter(
     // ── Full-page routes (outside shell) ──────────────────────────────────────
     GoRoute(path: RoutePaths.register, builder: (_, __) => const RegistrationPage()),
     GoRoute(path: RoutePaths.users, builder: (_, __) => const UserListPage()),
+    GoRoute(path: RoutePaths.pdfViewer, builder: (_, __) => const PdfExamplePage()),
   ],
 );
 
@@ -116,7 +118,12 @@ class ShowcaseShell extends StatelessWidget {
           if (i < _destinations.length) {
             _switchBranch(i);
           } else {
-            context.go(RoutePaths.register);
+            final extrasIndex = i - _destinations.length;
+            if (extrasIndex == 0) {
+              context.go(RoutePaths.register);
+            } else if (extrasIndex == 1) {
+              context.go(RoutePaths.pdfViewer);
+            }
           }
         },
         children: [
@@ -139,6 +146,11 @@ class ShowcaseShell extends StatelessWidget {
             icon: const Icon(Icons.person_add_outlined),
             selectedIcon: Icon(Icons.person_add, color: cs.primary),
             label: const Text('Register'),
+          ),
+          NavigationDrawerDestination(
+            icon: const Icon(Icons.picture_as_pdf_outlined),
+            selectedIcon: Icon(Icons.picture_as_pdf, color: cs.primary),
+            label: const Text('PDF Viewer Demo'),
           ),
         ],
       ),

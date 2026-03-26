@@ -12,4 +12,5 @@ abstract final class RoutePaths {
   static const String form = '/form';
   static const String register = '/register';
   static const String users = '/users';
+  static const String pdfViewer = '/pdf-viewer';
 }
