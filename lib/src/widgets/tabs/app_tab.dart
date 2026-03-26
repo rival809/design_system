@@ -71,6 +71,8 @@ class AppTab extends StatelessWidget {
           switch (style) {
             AppTabStyle.flat => TabBar(
               dividerColor: Colors.transparent,
+              indicatorSize: TabBarIndicatorSize.tab,
+              indicatorPadding: EdgeInsets.zero,
               indicatorColor: indicatorColor ?? cs.primary,
               indicatorWeight: 3,
               labelColor: selectedColor ?? cs.primary,
