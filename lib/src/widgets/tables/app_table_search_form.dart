@@ -4,6 +4,7 @@ import '../buttons/primary_button.dart';
 import '../dropdowns/app_searchable_dropdown.dart';
 import '../text_fields/app_text_field.dart';
 import 'app_base_table.dart';
+import 'table_utils.dart';
 
 class AppTableSearchRule {
   const AppTableSearchRule({required this.key, required this.method, required this.value});
@@ -50,7 +51,7 @@ class _AppTableSearchFormState extends State<AppTableSearchForm> {
   late final Map<String, AppBaseTableKey> _keyMap;
   late final List<String> _orderedKeys;
   late Set<String> _visibleKeys;
-  final List<_SearchRowState> _rows = [];
+  final List<_SearchRowModel> _rows = [];
 
   @override
   void initState() {
@@ -104,20 +105,21 @@ class _AppTableSearchFormState extends State<AppTableSearchForm> {
 
     if (helper is Map) {
       final map = Map<String, dynamic>.from(helper);
+      // Supported value keys (in priority order):
+      // {value, id, key, code, helper_id} for the submitted value.
+      // {label, name, text, title, helper_name} for the display label.
       final rawValue =
           map['value'] ??
           map['id'] ??
           map['key'] ??
           map['code'] ??
-          map['department_id'] ??
-          map['name'] ??
-          map['text'];
+          map['helper_id'];
       final rawLabel =
           map['label'] ??
           map['name'] ??
           map['text'] ??
           map['title'] ??
-          map['department_name'] ??
+          map['helper_name'] ??
           rawValue;
       final value = rawValue?.toString().trim();
       final label = rawLabel?.toString().trim();
@@ -137,7 +139,7 @@ class _AppTableSearchFormState extends State<AppTableSearchForm> {
     final helperOptions = _helperOptions(key);
     setState(() {
       _rows.add(
-        _SearchRowState(
+        _SearchRowModel(
           selectedKey: key,
           selectedMethod: methods.first,
           controller: TextEditingController(),
@@ -212,7 +214,7 @@ class _AppTableSearchFormState extends State<AppTableSearchForm> {
                       keyOptions: _orderedKeys,
                       selectedKey: _rows[i].selectedKey,
                       selectedMethod: _rows[i].selectedMethod,
-                      keyLabelBuilder: _titleFromKey,
+                      keyLabelBuilder: titleFromKey,
                       methodOptions: _methodOptions(_rows[i].selectedKey),
                       helperOptions: _helperOptions(_rows[i].selectedKey),
                       selectedHelperValue: _rows[i].selectedHelperValue,
@@ -260,7 +262,7 @@ class _AppTableSearchFormState extends State<AppTableSearchForm> {
                         CheckedPopupMenuItem<String>(
                           value: key,
                           checked: _visibleKeys.contains(key),
-                          child: Text(_titleFromKey(key)),
+                          child: Text(titleFromKey(key)),
                         ),
                     ],
                     child: _SelectBox(
@@ -458,8 +460,8 @@ class _RemoveButton extends StatelessWidget {
   }
 }
 
-class _SearchRowState {
-  _SearchRowState({
+class _SearchRowModel {
+  _SearchRowModel({
     required this.selectedKey,
     required this.selectedMethod,
     required this.controller,
@@ -479,11 +481,3 @@ class _HelperOption {
   final String label;
 }
 
-String _titleFromKey(String key) {
-  if (key.isEmpty) return key;
-  final parts = key.split('_').where((e) => e.isNotEmpty).toList();
-  if (parts.isEmpty) return key;
-  return parts
-      .map((part) => '${part[0].toUpperCase()}${part.substring(1).toLowerCase()}')
-      .join(' ');
-}

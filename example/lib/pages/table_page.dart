@@ -147,74 +147,87 @@ class _TablePageState extends State<TablePage> {
               ),
             )
           : null,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Base Table', style: tt.titleSmall),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              crossAxisAlignment: WrapCrossAlignment.center,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Use actual available height so the table adapts to AppBar,
+          // SafeArea, and keyboard without relying on magic constants.
+          // 48 (title) + 12 + 48 (toolbar) + 12 + 4 (progress) + 12 + 70*2 (footer) ≈ 140
+          // We clamp to a sensible minimum to avoid negative heights.
+          final tableHeight = (constraints.maxHeight - 140).clamp(140.0, double.infinity);
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                PrimaryButton(
-                  label: 'Filter Pencarian',
-                  variant: ButtonVariant.outlined,
-                  size: ButtonSize.small,
-                  leadingIcon: const Icon(Icons.filter_alt_outlined),
-                  onPressed: _openSearchForm,
-                ),
-                PrimaryButton(
-                  label: 'Reset Filter',
-                  variant: ButtonVariant.secondary,
-                  size: ButtonSize.small,
-                  onPressed: _controller.resetSearch,
-                ),
-                Text('Rules: ${_controller.searchRules.length}', style: tt.bodySmall),
-              ],
-            ),
-            if (_controller.isLoading) ...[
-              const SizedBox(height: 12),
-              const LinearProgressIndicator(),
-            ],
-            const SizedBox(height: 12),
-            AppBaseTable(
-              key: ValueKey(
-                'table-${_controller.currentPage}-${_controller.rowsPerPage}-${_controller.serverItems.length}-${_controller.visibleKeys.join(',')}-${_controller.isLoading}-${_controller.searchRules.length}',
-              ),
-              data: _controller.tableData,
-              height: MediaQuery.of(context).size.height - 400,
-              paginationMode: AppBaseTablePaginationMode.backend,
-              columnScaleMode: AppBaseTableColumnScaleMode.fill,
-              actionRenderer: _buildActionRenderer,
-              customColumnRenderers: {
-                'status': (ctx) => Center(
-                  child: AppChip(
-                    label: ctx.cell.value.toString(),
-                    variant: ChipVariant.green,
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  ),
-                ),
-                'nip': (ctx) => Row(
+                Text('Base Table', style: tt.titleSmall),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    CircleAvatar(
-                      backgroundColor: Colors.blue.shade100,
-                      child: Text(ctx.cell.value.toString().substring(0, 1)),
+                    PrimaryButton(
+                      label: 'Filter Pencarian',
+                      variant: ButtonVariant.outlined,
+                      size: ButtonSize.small,
+                      leadingIcon: const Icon(Icons.filter_alt_outlined),
+                      onPressed: _openSearchForm,
                     ),
-                    const SizedBox(width: 8),
-                    Text(ctx.cell.value.toString()),
+                    PrimaryButton(
+                      label: 'Reset Filter',
+                      variant: ButtonVariant.secondary,
+                      size: ButtonSize.small,
+                      onPressed: _controller.resetSearch,
+                    ),
+                    Text('Rules: ${_controller.searchRules.length}', style: tt.bodySmall),
                   ],
                 ),
-              },
-              rowsPerPage: _controller.rowsPerPage,
-              rowsPerPageOptions: const [10],
-              onRowsPerPageChanged: _controller.changeRowsPerPage,
-              onPageChanged: _controller.changePage,
+                if (_controller.isLoading) ...[
+                  const SizedBox(height: 12),
+                  const LinearProgressIndicator(),
+                ],
+                const SizedBox(height: 12),
+                // ValueKey: only keys that require full widget recreation (column
+                // structure changes). Data or page changes are handled via
+                // didUpdateWidget inside AppBaseTable — no need to recreate.
+                AppBaseTable(
+                  key: ValueKey(
+                    '${_controller.visibleKeys.join(',')}_${_controller.searchRules.length}',
+                  ),
+                  data: _controller.tableData,
+                  height: tableHeight,
+                  paginationMode: AppBaseTablePaginationMode.backend,
+                  columnScaleMode: AppBaseTableColumnScaleMode.fill,
+                  actionRenderer: _buildActionRenderer,
+                  customColumnRenderers: {
+                    'kd_wil': (ctx) => Center(
+                      child: AppChip(
+                        label: ctx.cell.value.toString(),
+                        variant: ChipVariant.green,
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      ),
+                    ),
+                    // 'nip': (ctx) => Row(
+                    //   children: [
+                    //     CircleAvatar(
+                    //       backgroundColor: Colors.blue.shade100,
+                    //       child: Text(ctx.cell.value.toString().substring(0, 1)),
+                    //     ),
+                    //     const SizedBox(width: 8),
+                    //     Text(ctx.cell.value.toString()),
+                    //   ],
+                    // ),
+                  },
+                  rowsPerPage: _controller.rowsPerPage,
+                  rowsPerPageOptions: const [10, 25, 50, 100, 250, 500, 1000],
+                  onRowsPerPageChanged: _controller.changeRowsPerPage,
+                  onPageChanged: _controller.changePage,
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

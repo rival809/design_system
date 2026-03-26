@@ -1,5 +1,9 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:trina_grid/trina_grid.dart';
+
+import 'table_utils.dart';
 
 import '../buttons/primary_button.dart';
 
@@ -245,7 +249,7 @@ class _AppBaseTableState extends State<AppBaseTable> {
       final hasCustomRenderer = widget.customColumnRenderers?.containsKey(k.key) ?? false;
 
       return TrinaColumn(
-        title: _titleFromKey(k.key),
+        title: titleFromKey(k.key),
         field: k.key,
         type: TrinaColumnType.text(),
         enableSorting: true,
@@ -300,8 +304,10 @@ class _AppBaseTableState extends State<AppBaseTable> {
     return switch (widget.columnScaleMode) {
       AppBaseTableColumnScaleMode.none => TrinaAutoSizeMode.none,
       AppBaseTableColumnScaleMode.equal => TrinaAutoSizeMode.equal,
+      // scale: proportional based on original column widths
       AppBaseTableColumnScaleMode.scale => TrinaAutoSizeMode.scale,
-      AppBaseTableColumnScaleMode.fill => TrinaAutoSizeMode.scale,
+      // fill: distribute remaining space equally across all columns
+      AppBaseTableColumnScaleMode.fill => TrinaAutoSizeMode.equal,
     };
   }
 
@@ -385,8 +391,17 @@ class _AppBaseTableState extends State<AppBaseTable> {
         : widget.data.items;
     final rows = _buildRows(visibleItems);
 
+    // Calculate the ideal height for the table content to shrink-wrap when
+    // data is small, but cap it at widget.height so it scrolls when data is large.
+    final computedHeight =
+        widget.headerHeight +
+        (rows.isEmpty ? 60 : rows.length * widget.rowHeight) +
+        (widget.showMetaFooter ? 70 : 0) +
+        4; // border buffer
+    final finalHeight = math.min(widget.height, computedHeight);
+
     return Container(
-      height: widget.height,
+      height: finalHeight,
       width: double.infinity,
       decoration: BoxDecoration(
         color: cs.surface,
@@ -398,7 +413,7 @@ class _AppBaseTableState extends State<AppBaseTable> {
           Expanded(
             child: TrinaGrid(
               key: ValueKey(
-                '${widget.data.keys.map((e) => e.key).join('|')}|${rows.length}|$currentPage|$effectiveRowsPerPage',
+                '${widget.data.keys.map((e) => e.key).join('|')}|${rows.length}|$currentPage|$effectiveRowsPerPage|${identityHashCode(widget.data.items)}',
               ),
               columns: columns,
               rows: rows,
@@ -590,7 +605,6 @@ class _BorderedDropdown<T> extends StatelessWidget {
       height: 32,
       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        // border: Border.all(color: cs.outline),
         borderRadius: BorderRadius.circular(6),
         color: enabled ? cs.surface : cs.surfaceContainerLow,
       ),
@@ -642,15 +656,6 @@ class _FooterIconButton extends StatelessWidget {
       ),
     );
   }
-}
-
-String _titleFromKey(String key) {
-  if (key.isEmpty) return key;
-  final parts = key.split('_').where((e) => e.isNotEmpty).toList();
-  if (parts.isEmpty) return key;
-  return parts
-      .map((part) => '${part[0].toUpperCase()}${part.substring(1).toLowerCase()}')
-      .join(' ');
 }
 
 int? _tryInt(Object? value) {
