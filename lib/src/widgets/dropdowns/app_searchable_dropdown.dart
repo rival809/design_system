@@ -133,6 +133,7 @@ class AppSearchableDropdown<T> extends StatelessWidget {
     final decoration = InputDecoration(
       filled: true,
       fillColor: fillColor,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       hintText: hint,
       hintStyle: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
       errorText: hasError ? errorText : null,
@@ -250,24 +251,30 @@ class AppSearchableDropdown<T> extends StatelessWidget {
       popupProps: popupProps,
       dropdownBuilder: (context, selected) {
         if (selected == null) {
-          return Text(
-            hint ?? '',
-            maxLines: selectedTextMode == AppDropdownTextMode.singleLine ? 1 : null,
-            overflow: selectedTextMode == AppDropdownTextMode.singleLine
-                ? TextOverflow.ellipsis
-                : TextOverflow.visible,
-            style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+          return Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              hint ?? '',
+              maxLines: selectedTextMode == AppDropdownTextMode.singleLine ? 1 : null,
+              overflow: selectedTextMode == AppDropdownTextMode.singleLine
+                  ? TextOverflow.ellipsis
+                  : TextOverflow.visible,
+              style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+            ),
           );
         }
 
         final label = itemAsString != null ? itemAsString!(selected) : selected.toString();
-        return Text(
-          label,
-          maxLines: selectedTextMode == AppDropdownTextMode.singleLine ? 1 : null,
-          overflow: selectedTextMode == AppDropdownTextMode.singleLine
-              ? TextOverflow.ellipsis
-              : TextOverflow.visible,
-          style: tt.bodySmall?.copyWith(color: cs.onSurface),
+        return Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            label,
+            maxLines: selectedTextMode == AppDropdownTextMode.singleLine ? 1 : null,
+            overflow: selectedTextMode == AppDropdownTextMode.singleLine
+                ? TextOverflow.ellipsis
+                : TextOverflow.visible,
+            style: tt.bodySmall?.copyWith(color: cs.onSurface),
+          ),
         );
       },
       dropdownButtonProps: DropdownButtonProps(

@@ -82,25 +82,66 @@ class _AppTableSearchFormState extends State<AppTableSearchForm> {
     return methods;
   }
 
-  String _valuePlaceholder(String key) {
-    final helper = (_keyMap[key]?.helper ?? const <String>[])
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
-    if (helper.isEmpty) return widget.valueHint;
-    return helper.first;
+  List<_HelperOption> _helperOptions(String key) {
+    final raw = _keyMap[key]?.helper ?? const <Object?>[];
+    final options = raw.map(_toHelperOption).whereType<_HelperOption>().toList();
+    return options;
+  }
+
+  _HelperOption? _toHelperOption(Object? helper) {
+    if (helper == null) return null;
+
+    if (helper is String) {
+      final value = helper.trim();
+      if (value.isEmpty) return null;
+      return _HelperOption(value: value, label: value);
+    }
+
+    if (helper is num || helper is bool) {
+      final value = helper.toString();
+      return _HelperOption(value: value, label: value);
+    }
+
+    if (helper is Map) {
+      final map = Map<String, dynamic>.from(helper);
+      final rawValue =
+          map['value'] ??
+          map['id'] ??
+          map['key'] ??
+          map['code'] ??
+          map['department_id'] ??
+          map['name'] ??
+          map['text'];
+      final rawLabel =
+          map['label'] ??
+          map['name'] ??
+          map['text'] ??
+          map['title'] ??
+          map['department_name'] ??
+          rawValue;
+      final value = rawValue?.toString().trim();
+      final label = rawLabel?.toString().trim();
+      if (value == null || value.isEmpty) return null;
+      return _HelperOption(value: value, label: (label == null || label.isEmpty) ? value : label);
+    }
+
+    final fallback = helper.toString().trim();
+    if (fallback.isEmpty) return null;
+    return _HelperOption(value: fallback, label: fallback);
   }
 
   void _addRow() {
     if (_orderedKeys.isEmpty) return;
     final key = _orderedKeys.first;
     final methods = _methodOptions(key);
+    final helperOptions = _helperOptions(key);
     setState(() {
       _rows.add(
         _SearchRowState(
           selectedKey: key,
           selectedMethod: methods.first,
           controller: TextEditingController(),
+          selectedHelperValue: helperOptions.isEmpty ? null : helperOptions.first.value,
         ),
       );
     });
@@ -130,7 +171,7 @@ class _AppTableSearchFormState extends State<AppTableSearchForm> {
           (row) => AppTableSearchRule(
             key: row.selectedKey,
             method: row.selectedMethod,
-            value: row.controller.text.trim(),
+            value: row.selectedHelperValue ?? row.controller.text.trim(),
           ),
         )
         .where((row) => row.value.isNotEmpty)
@@ -173,20 +214,29 @@ class _AppTableSearchFormState extends State<AppTableSearchForm> {
                       selectedMethod: _rows[i].selectedMethod,
                       keyLabelBuilder: _titleFromKey,
                       methodOptions: _methodOptions(_rows[i].selectedKey),
-                      valueHint: _valuePlaceholder(_rows[i].selectedKey),
+                      helperOptions: _helperOptions(_rows[i].selectedKey),
+                      selectedHelperValue: _rows[i].selectedHelperValue,
+                      valueHint: widget.valueHint,
                       controller: _rows[i].controller,
                       canRemove: _rows.length > 1,
                       onKeyChanged: (value) {
                         final methods = _methodOptions(value);
+                        final helperOptions = _helperOptions(value);
                         setState(() {
                           _rows[i].selectedKey = value;
                           if (!methods.contains(_rows[i].selectedMethod)) {
                             _rows[i].selectedMethod = methods.first;
                           }
+                          _rows[i].selectedHelperValue = helperOptions.isEmpty
+                              ? null
+                              : helperOptions.first.value;
                         });
                       },
                       onMethodChanged: (value) {
                         setState(() => _rows[i].selectedMethod = value);
+                      },
+                      onHelperValueChanged: (value) {
+                        setState(() => _rows[i].selectedHelperValue = value);
                       },
                       onRemove: () => _removeRow(i),
                     ),
@@ -251,11 +301,14 @@ class _SearchAspectRow extends StatelessWidget {
     required this.selectedMethod,
     required this.keyLabelBuilder,
     required this.methodOptions,
+    required this.helperOptions,
+    required this.selectedHelperValue,
     required this.valueHint,
     required this.controller,
     required this.canRemove,
     required this.onKeyChanged,
     required this.onMethodChanged,
+    required this.onHelperValueChanged,
     required this.onRemove,
   });
 
@@ -264,53 +317,83 @@ class _SearchAspectRow extends StatelessWidget {
   final String selectedMethod;
   final String Function(String value) keyLabelBuilder;
   final List<String> methodOptions;
+  final List<_HelperOption> helperOptions;
+  final String? selectedHelperValue;
   final String valueHint;
   final TextEditingController controller;
   final bool canRemove;
   final ValueChanged<String> onKeyChanged;
   final ValueChanged<String> onMethodChanged;
+  final ValueChanged<String?> onHelperValueChanged;
   final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Expanded(
           flex: 4,
-          child: AppSearchableDropdown<String>(
-            hint: 'Nama',
-            selectedItem: selectedKey,
-            items: keyOptions,
-            itemAsString: keyLabelBuilder,
-            compareFn: (a, b) => a == b,
-            selectedTextMode: AppDropdownTextMode.singleLine,
-            // popupItemTextMode: AppDropdownTextMode.singleLine,
-            onChanged: (value) {
-              if (value != null) onKeyChanged(value);
-            },
+          child: SizedBox(
+            height: 48,
+            child: AppSearchableDropdown<String>(
+              hint: 'Nama',
+              selectedItem: selectedKey,
+              items: keyOptions,
+              itemAsString: keyLabelBuilder,
+              compareFn: (a, b) => a == b,
+              selectedTextMode: AppDropdownTextMode.singleLine,
+              popupItemTextMode: AppDropdownTextMode.singleLine,
+              onChanged: (value) {
+                if (value != null) onKeyChanged(value);
+              },
+            ),
           ),
         ),
         const SizedBox(width: 8),
         Expanded(
           flex: 3,
-          child: AppSearchableDropdown<String>(
-            hint: '=',
-            selectedItem: selectedMethod,
-            selectedTextMode: AppDropdownTextMode.singleLine,
-            items: methodOptions,
-            compareFn: (a, b) => a == b,
-            onChanged: (value) {
-              if (value != null) onMethodChanged(value);
-            },
+          child: SizedBox(
+            height: 48,
+            child: AppSearchableDropdown<String>(
+              hint: '=',
+              selectedItem: selectedMethod,
+              selectedTextMode: AppDropdownTextMode.singleLine,
+              popupItemTextMode: AppDropdownTextMode.singleLine,
+              items: methodOptions,
+              compareFn: (a, b) => a == b,
+              onChanged: (value) {
+                if (value != null) onMethodChanged(value);
+              },
+            ),
           ),
         ),
         const SizedBox(width: 8),
         Expanded(
           flex: 6,
-          child: AppTextField(controller: controller, hint: valueHint),
+          child: SizedBox(
+            height: 48,
+            child: helperOptions.isNotEmpty
+                ? AppSearchableDropdown<String>(
+                    hint: valueHint,
+                    selectedItem: selectedHelperValue,
+                    items: helperOptions.map((e) => e.value).toList(),
+                    itemAsString: (value) {
+                      final option = helperOptions.where((e) => e.value == value).firstOrNull;
+                      return option?.label ?? value;
+                    },
+                    compareFn: (a, b) => a == b,
+                    selectedTextMode: AppDropdownTextMode.singleLine,
+                    popupItemTextMode: AppDropdownTextMode.multiLine,
+                    onChanged: onHelperValueChanged,
+                  )
+                : AppTextField(controller: controller, hint: valueHint),
+          ),
         ),
-        if (canRemove) ...[const SizedBox(width: 8), _RemoveButton(onTap: onRemove)],
+        if (canRemove) ...[
+          const SizedBox(width: 8),
+          SizedBox(width: 48, height: 48, child: _RemoveButton(onTap: onRemove)),
+        ],
       ],
     );
   }
@@ -380,11 +463,20 @@ class _SearchRowState {
     required this.selectedKey,
     required this.selectedMethod,
     required this.controller,
+    this.selectedHelperValue,
   });
 
   String selectedKey;
   String selectedMethod;
   TextEditingController controller;
+  String? selectedHelperValue;
+}
+
+class _HelperOption {
+  const _HelperOption({required this.value, required this.label});
+
+  final String value;
+  final String label;
 }
 
 String _titleFromKey(String key) {

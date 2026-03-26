@@ -130,7 +130,7 @@ class _TablePageState extends State<TablePage> {
       key: _scaffoldKey,
       endDrawer: _isDesktop(context)
           ? SizedBox(
-              width: 460,
+              width: 500,
               child: SafeArea(
                 child: AppTableSearchForm(
                   keys: _controller.searchKeys,
@@ -189,6 +189,25 @@ class _TablePageState extends State<TablePage> {
               paginationMode: AppBaseTablePaginationMode.backend,
               columnScaleMode: AppBaseTableColumnScaleMode.fill,
               actionRenderer: _buildActionRenderer,
+              customColumnRenderers: {
+                'status': (ctx) => Center(
+                  child: AppChip(
+                    label: ctx.cell.value.toString(),
+                    variant: ChipVariant.green,
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  ),
+                ),
+                'nip': (ctx) => Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Colors.blue.shade100,
+                      child: Text(ctx.cell.value.toString().substring(0, 1)),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(ctx.cell.value.toString()),
+                  ],
+                ),
+              },
               rowsPerPage: _controller.rowsPerPage,
               rowsPerPageOptions: const [10],
               onRowsPerPageChanged: _controller.changeRowsPerPage,

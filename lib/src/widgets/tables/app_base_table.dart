@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 import '../buttons/primary_button.dart';
-import '../chips/app_chip.dart';
 
 /// Pagination behavior mode for [AppBaseTable].
 enum AppBaseTablePaginationMode {
@@ -34,19 +33,24 @@ enum AppBaseTableColumnScaleMode {
 /// two buttons, or a dropdown menu.
 typedef AppBaseTableActionRenderer = Widget Function(TrinaColumnRendererContext context);
 
+/// Builder for custom column content.
+///
+/// Use this to render custom cells for specific columns identified by their keys.
+typedef AppBaseTableColumnRenderer = Widget Function(TrinaColumnRendererContext context);
+
 /// Column schema received from API under `data.keys`.
 class AppBaseTableKey {
   const AppBaseTableKey({required this.key, this.method = const [], this.helper = const []});
 
   final String key;
   final List<String> method;
-  final List<String> helper;
+  final List<Object?> helper;
 
   factory AppBaseTableKey.fromJson(Map<String, dynamic> json) {
     return AppBaseTableKey(
       key: (json['key'] ?? '').toString(),
       method: ((json['method'] as List?) ?? const []).map((e) => e.toString()).toList(),
-      helper: ((json['helper'] as List?) ?? const []).map((e) => e.toString()).toList(),
+      helper: List<Object?>.from((json['helper'] as List?) ?? const []),
     );
   }
 }
@@ -139,6 +143,7 @@ class AppBaseTable extends StatefulWidget {
     this.columnScaleMode = AppBaseTableColumnScaleMode.fill,
     this.actionRenderer,
     this.actionFieldNames = const {'aksi', 'action', 'actions'},
+    this.customColumnRenderers,
   });
 
   factory AppBaseTable.fromResponseJson(
@@ -160,6 +165,7 @@ class AppBaseTable extends StatefulWidget {
     AppBaseTableColumnScaleMode columnScaleMode = AppBaseTableColumnScaleMode.fill,
     AppBaseTableActionRenderer? actionRenderer,
     Set<String> actionFieldNames = const {'aksi', 'action', 'actions'},
+    Map<String, AppBaseTableColumnRenderer>? customColumnRenderers,
   }) {
     final response = AppBaseTableResponse.fromJson(json);
     return AppBaseTable(
@@ -181,6 +187,7 @@ class AppBaseTable extends StatefulWidget {
       columnScaleMode: columnScaleMode,
       actionRenderer: actionRenderer,
       actionFieldNames: actionFieldNames,
+      customColumnRenderers: customColumnRenderers,
     );
   }
 
@@ -201,6 +208,7 @@ class AppBaseTable extends StatefulWidget {
   final AppBaseTableColumnScaleMode columnScaleMode;
   final AppBaseTableActionRenderer? actionRenderer;
   final Set<String> actionFieldNames;
+  final Map<String, AppBaseTableColumnRenderer>? customColumnRenderers;
 
   @override
   State<AppBaseTable> createState() => _AppBaseTableState();
@@ -234,6 +242,8 @@ class _AppBaseTableState extends State<AppBaseTable> {
   List<TrinaColumn> _buildColumns(Color bgColor) {
     return widget.data.keys.map((k) {
       final normalized = k.key.toLowerCase();
+      final hasCustomRenderer = widget.customColumnRenderers?.containsKey(k.key) ?? false;
+
       return TrinaColumn(
         title: _titleFromKey(k.key),
         field: k.key,
@@ -241,21 +251,15 @@ class _AppBaseTableState extends State<AppBaseTable> {
         enableSorting: true,
         backgroundColor: bgColor,
         titlePadding: const EdgeInsets.symmetric(horizontal: 14),
-        titleTextAlign: normalized == 'status' || _isActionColumn(normalized)
+        titleTextAlign: hasCustomRenderer || _isActionColumn(normalized)
             ? TrinaColumnTextAlign.center
             : TrinaColumnTextAlign.left,
-        textAlign: normalized == 'status' || _isActionColumn(normalized)
+        textAlign: hasCustomRenderer || _isActionColumn(normalized)
             ? TrinaColumnTextAlign.center
             : TrinaColumnTextAlign.left,
         renderer: (ctx) {
-          if (normalized == 'status') {
-            return Center(
-              child: AppChip(
-                label: ctx.cell.value.toString(),
-                variant: ChipVariant.green,
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              ),
-            );
+          if (hasCustomRenderer) {
+            return widget.customColumnRenderers![k.key]!(ctx);
           }
 
           if (_isActionColumn(normalized)) {
@@ -392,55 +396,48 @@ class _AppBaseTableState extends State<AppBaseTable> {
       child: Column(
         children: [
           Expanded(
-            child: Stack(
-              children: [
-                TrinaGrid(
-                  key: ValueKey(
-                    '${widget.data.keys.map((e) => e.key).join('|')}|${rows.length}|$currentPage|$effectiveRowsPerPage',
+            child: TrinaGrid(
+              key: ValueKey(
+                '${widget.data.keys.map((e) => e.key).join('|')}|${rows.length}|$currentPage|$effectiveRowsPerPage',
+              ),
+              columns: columns,
+              rows: rows,
+              mode: widget.readOnly ? TrinaGridMode.readOnly : TrinaGridMode.normal,
+              noRowsWidget: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: cs.surface.withValues(alpha: 0.9),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: cs.outline),
                   ),
-                  columns: columns,
-                  rows: rows,
-                  mode: widget.readOnly ? TrinaGridMode.readOnly : TrinaGridMode.normal,
-                  configuration: TrinaGridConfiguration(
-                    columnSize: TrinaGridColumnSizeConfig(autoSizeMode: _resolveAutoSizeMode()),
-                    style: TrinaGridStyleConfig(
-                      gridPadding: 0,
-                      gridBackgroundColor: cs.surface,
-                      rowColor: cs.surface,
-                      oddRowColor: cs.surface,
-                      evenRowColor: cs.surface,
-                      activatedColor: selectedRowColor,
-                      activatedBorderColor: activeBorderColor,
-                      inactivatedBorderColor: inactiveBorderColor,
-                      cellColorInReadOnlyState: cs.surface,
-                      borderColor: cs.outline,
-                      gridBorderColor: Colors.transparent,
-                      gridBorderWidth: 0,
-                      rowHeight: widget.rowHeight,
-                      columnHeight: widget.headerHeight,
-                      columnTextStyle:
-                          tt.titleSmall?.copyWith(color: headerFg, fontWeight: FontWeight.w700) ??
-                          const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-                      cellTextStyle: tt.bodyMedium ?? const TextStyle(fontSize: 14),
-                      gridBorderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
+                  child: Text(widget.emptyLabel, style: tt.bodyMedium),
                 ),
-                if (rows.isEmpty)
-                  IgnorePointer(
-                    child: Center(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: cs.surface.withValues(alpha: 0.9),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: cs.outline),
-                        ),
-                        child: Text(widget.emptyLabel, style: tt.bodyMedium),
-                      ),
-                    ),
-                  ),
-              ],
+              ),
+              configuration: TrinaGridConfiguration(
+                columnSize: TrinaGridColumnSizeConfig(autoSizeMode: _resolveAutoSizeMode()),
+                style: TrinaGridStyleConfig(
+                  gridPadding: 0,
+                  gridBackgroundColor: cs.surface,
+                  rowColor: cs.surface,
+                  oddRowColor: cs.surface,
+                  evenRowColor: cs.surface,
+                  activatedColor: selectedRowColor,
+                  activatedBorderColor: activeBorderColor,
+                  inactivatedBorderColor: inactiveBorderColor,
+                  cellColorInReadOnlyState: cs.surface,
+                  borderColor: cs.outline,
+                  gridBorderColor: Colors.transparent,
+                  gridBorderWidth: 0,
+                  rowHeight: widget.rowHeight,
+                  columnHeight: widget.headerHeight,
+                  columnTextStyle:
+                      tt.titleSmall?.copyWith(color: headerFg, fontWeight: FontWeight.w700) ??
+                      const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                  cellTextStyle: tt.bodyMedium ?? const TextStyle(fontSize: 14),
+                  gridBorderRadius: BorderRadius.circular(8),
+                ),
+              ),
             ),
           ),
           if (widget.showMetaFooter)
