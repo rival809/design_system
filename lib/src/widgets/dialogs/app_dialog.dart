@@ -9,6 +9,12 @@ enum DialogType {
   /// Failed state with centered icon and message.
   fail,
 
+  /// Informational state with centered icon and message.
+  info,
+
+  /// Warning state with centered icon and message.
+  warning,
+
   /// Confirmation state with title and supporting message.
   confirm,
 }
@@ -19,6 +25,11 @@ class AppDialogAction {
     required this.id,
     required this.label,
     this.variant = ButtonVariant.filled,
+    this.size = ButtonSize.medium,
+    this.isLoading = false,
+    this.leadingIcon,
+    this.trailingIcon,
+    this.expand = true,
     this.onPressed,
     this.closeDialog = true,
   });
@@ -31,6 +42,21 @@ class AppDialogAction {
 
   /// Visual button variant.
   final ButtonVariant variant;
+
+  /// Visual button size.
+  final ButtonSize size;
+
+  /// Whether the button shows a loading indicator and becomes disabled.
+  final bool isLoading;
+
+  /// Optional icon shown before [label].
+  final Widget? leadingIcon;
+
+  /// Optional icon shown after [label].
+  final Widget? trailingIcon;
+
+  /// Whether the button expands to fill the available width.
+  final bool expand;
 
   /// Optional callback when pressed.
   final VoidCallback? onPressed;
@@ -133,43 +159,77 @@ class AppDialog extends StatelessWidget {
   Color _accentColor(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return switch (config.type) {
-      DialogType.success => cs.primary,
-      DialogType.fail => cs.error,
+      DialogType.success => Colors.green.shade700,
+      DialogType.fail => Colors.red.shade700,
+      DialogType.info => Colors.blue.shade600,
+      DialogType.warning => Colors.amber.shade600,
       DialogType.confirm => cs.primary,
     };
   }
-
-  Color _iconColor(BuildContext context) => _accentColor(context);
 
   Widget? _buildIcon(BuildContext context) {
     if (config.type == DialogType.confirm && config.icon == null) {
       return null;
     }
 
+    final foregroundColor = Colors.white;
+
     if (config.icon != null) {
-      return IconTheme(
-        data: IconThemeData(color: _iconColor(context), size: 40),
-        child: config.icon!,
+      return Container(
+        width: 92,
+        height: 92,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Theme.of(context).colorScheme.surfaceDim,
+        ),
+        child: Container(
+          width: 64,
+          height: 64,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(shape: BoxShape.circle, color: _accentColor(context)),
+          child: IconTheme(
+            data: IconThemeData(color: foregroundColor, size: 40),
+            child: config.icon!,
+          ),
+        ),
       );
     }
 
     IconData? iconData = switch (config.type) {
-      DialogType.success => Icons.check_circle_outline_rounded,
+      DialogType.success => Icons.check_rounded,
       DialogType.fail => Icons.close_rounded,
+      DialogType.info => null,
+      DialogType.warning => Icons.warning_amber_rounded,
       DialogType.confirm => null,
     };
 
-    if (iconData == null) return null;
+    Widget? iconChild;
+    if (config.type == DialogType.info) {
+      iconChild = Text(
+        'i',
+        style: TextStyle(color: foregroundColor, fontWeight: FontWeight.w900, fontSize: 28),
+      );
+    } else {
+      if (iconData == null) return null;
+      iconChild = Icon(iconData, color: foregroundColor, size: 40);
+    }
 
     return Container(
-      width: 120,
-      height: 120,
+      width: 92,
+      height: 92,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        color: Theme.of(context).colorScheme.surfaceDim,
       ),
-      child: Icon(iconData, color: _iconColor(context), size: 56),
+      child: Container(
+        width: 64,
+        height: 64,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(shape: BoxShape.circle, color: _accentColor(context)),
+        child: iconChild,
+      ),
     );
   }
 
@@ -251,7 +311,11 @@ class _DialogActions extends StatelessWidget {
       return PrimaryButton(
         label: action.label,
         variant: action.variant,
-        expand: true,
+        size: action.size,
+        isLoading: action.isLoading,
+        leadingIcon: action.leadingIcon,
+        trailingIcon: action.trailingIcon,
+        expand: action.expand,
         onPressed: () => onActionTap(action),
       );
     }
@@ -264,7 +328,11 @@ class _DialogActions extends StatelessWidget {
             child: PrimaryButton(
               label: actions[i].label,
               variant: actions[i].variant,
-              expand: true,
+              size: actions[i].size,
+              isLoading: actions[i].isLoading,
+              leadingIcon: actions[i].leadingIcon,
+              trailingIcon: actions[i].trailingIcon,
+              expand: actions[i].expand,
               onPressed: () => onActionTap(actions[i]),
             ),
           ),

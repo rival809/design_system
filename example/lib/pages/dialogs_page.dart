@@ -25,11 +25,15 @@ class _DialogSection extends StatelessWidget {
         title: switch (type) {
           DialogType.success => null,
           DialogType.fail => null,
+          DialogType.info => null,
+          DialogType.warning => null,
           DialogType.confirm => 'Konfirmasi',
         },
         message: switch (type) {
           DialogType.success => 'Message!',
           DialogType.fail => 'Message!',
+          DialogType.info => 'Message!',
+          DialogType.warning => 'Message!',
           DialogType.confirm => 'Message',
         },
         actions: switch (type) {
@@ -37,6 +41,17 @@ class _DialogSection extends StatelessWidget {
             AppDialogAction(id: 'ok', label: 'Ya, saya mengerti', variant: ButtonVariant.filled),
           ],
           DialogType.fail => const [
+            AppDialogAction(
+              id: 'retry',
+              label: 'Periksa Kembali',
+              variant: ButtonVariant.secondary,
+            ),
+            AppDialogAction(id: 'ok', label: 'Ya, saya mengerti', variant: ButtonVariant.filled),
+          ],
+          DialogType.info => const [
+            AppDialogAction(id: 'ok', label: 'Ya, saya mengerti', variant: ButtonVariant.filled),
+          ],
+          DialogType.warning => const [
             AppDialogAction(
               id: 'retry',
               label: 'Periksa Kembali',
@@ -65,6 +80,8 @@ class _DialogSection extends StatelessWidget {
       children: [
         PrimaryButton(label: 'Success', onPressed: () => _show(context, DialogType.success)),
         PrimaryButton(label: 'Fail', onPressed: () => _show(context, DialogType.fail)),
+        PrimaryButton(label: 'Info', onPressed: () => _show(context, DialogType.info)),
+        PrimaryButton(label: 'Warning', onPressed: () => _show(context, DialogType.warning)),
         PrimaryButton(label: 'Confirm', onPressed: () => _show(context, DialogType.confirm)),
       ],
     );
