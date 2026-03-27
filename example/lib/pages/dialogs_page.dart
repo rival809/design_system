@@ -23,20 +23,36 @@ class _DialogSection extends StatelessWidget {
       config: AppDialogConfig(
         type: type,
         title: switch (type) {
-          DialogType.info => 'Information',
-          DialogType.success => 'All done!',
-          DialogType.warning => 'Are you sure?',
-          DialogType.destructive => 'Delete permanently?',
+          DialogType.success => null,
+          DialogType.fail => null,
+          DialogType.confirm => 'Konfirmasi',
         },
-        content: Text(switch (type) {
-          DialogType.info => 'This is a neutral informational message.',
-          DialogType.success => 'Your changes have been saved successfully.',
-          DialogType.warning => 'This action may have unintended side effects.',
-          DialogType.destructive =>
-            'This item will be permanently deleted and cannot be recovered.',
-        }),
-        confirmLabel: type == DialogType.destructive ? 'Delete' : 'Got it',
-        showCancelButton: type == DialogType.warning || type == DialogType.destructive,
+        message: switch (type) {
+          DialogType.success => 'Message!',
+          DialogType.fail => 'Message!',
+          DialogType.confirm => 'Message',
+        },
+        actions: switch (type) {
+          DialogType.success => const [
+            AppDialogAction(id: 'ok', label: 'Ya, saya mengerti', variant: ButtonVariant.filled),
+          ],
+          DialogType.fail => const [
+            AppDialogAction(
+              id: 'retry',
+              label: 'Periksa Kembali',
+              variant: ButtonVariant.secondary,
+            ),
+            AppDialogAction(id: 'ok', label: 'Ya, saya mengerti', variant: ButtonVariant.filled),
+          ],
+          DialogType.confirm => const [
+            AppDialogAction(
+              id: 'retry',
+              label: 'Periksa Kembali',
+              variant: ButtonVariant.secondary,
+            ),
+            AppDialogAction(id: 'ok', label: 'Ya, saya mengerti', variant: ButtonVariant.filled),
+          ],
+        },
       ),
     );
   }
@@ -47,13 +63,9 @@ class _DialogSection extends StatelessWidget {
       spacing: 12,
       runSpacing: 12,
       children: [
-        PrimaryButton(label: 'Info', onPressed: () => _show(context, DialogType.info)),
         PrimaryButton(label: 'Success', onPressed: () => _show(context, DialogType.success)),
-        PrimaryButton(label: 'Warning', onPressed: () => _show(context, DialogType.warning)),
-        PrimaryButton(
-          label: 'Destructive',
-          onPressed: () => _show(context, DialogType.destructive),
-        ),
+        PrimaryButton(label: 'Fail', onPressed: () => _show(context, DialogType.fail)),
+        PrimaryButton(label: 'Confirm', onPressed: () => _show(context, DialogType.confirm)),
       ],
     );
   }
