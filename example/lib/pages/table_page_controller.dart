@@ -11,14 +11,11 @@ enum ActionMode { singleButton, doubleButton, dropdown }
 /// Token JWT untuk autentikasi API. Ganti dengan mekanisme auth yang sebenarnya
 /// (misal: dari secure storage / BLoC auth) pada implementasi production.
 const _kBearerToken =
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTkyLjE2OC45OS40Nzo4MDAwL2FwaS9sb2dpbiIsImlhdCI6MTc3NDUyNjgzMiwiZXhwIjoxNzc0NTQ4NDMyLCJuYmYiOjE3NzQ1MjY4MzIsImp0aSI6IjBmR05ROExudkR0YnBmNk0iLCJzdWIiOiIxMSIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ._OwYgzu8C0LrE28eDq_xJDXpgJtaZ7rUSOOXD4BtiIg';
+    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTkyLjE2OC45OS40Nzo4MDAwL2FwaS9sb2dpbiIsImlhdCI6MTc3NDU3MTMyMCwiZXhwIjoxNzc0NTkyOTIwLCJuYmYiOjE3NzQ1NzEzMjAsImp0aSI6Im9ZbUdoVmM3eTJ5SmRJUkoiLCJzdWIiOiIxMSIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.7-9097hkyiDV32VRXv03QqjvnVqL-tUT5nhZoXWXp_Q';
 
 class TablePageController extends ChangeNotifier {
   TablePageController() {
-    _service = UserTableService(
-      dio: Dio(),
-      token: _kBearerToken,
-    );
+    _service = UserTableService(dio: Dio(), token: _kBearerToken);
   }
 
   late final UserTableService _service;
@@ -62,10 +59,7 @@ class TablePageController extends ChangeNotifier {
   int get maxPage => _maxPage;
 
   AppBaseTableData get tableData {
-    final visibleKeyOrder = _apiKeys
-        .map((k) => k.key)
-        .where(_visibleKeys.contains)
-        .toList();
+    final visibleKeyOrder = _apiKeys.map((k) => k.key).where(_visibleKeys.contains).toList();
 
     return AppBaseTableData(
       keys: visibleKeyOrder.map((key) => AppBaseTableKey(key: key)).toList(),
@@ -84,7 +78,7 @@ class TablePageController extends ChangeNotifier {
 
   Future<void> fetchPage({bool isLoadMore = false}) async {
     final requestId = ++_requestCounter;
-    
+
     if (isLoadMore) {
       _isLoadingMore = true;
     } else {

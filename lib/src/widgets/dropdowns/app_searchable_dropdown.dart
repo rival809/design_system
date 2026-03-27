@@ -118,16 +118,14 @@ class AppSearchableDropdown<T> extends StatelessWidget {
 
     final hasError = errorText != null && errorText!.isNotEmpty;
     final fillColor = enabled ? cs.surface : cs.onSurface.withValues(alpha: 0.12);
-    final borderSide = showBorder
-        ? BorderSide(color: hasError ? cs.error : cs.outline)
-        : BorderSide.none;
+    final borderSide =
+        showBorder ? BorderSide(color: hasError ? cs.error : cs.outline) : BorderSide.none;
     final focusedBorderSide = showBorder
         ? BorderSide(color: hasError ? cs.error : cs.primary, width: 2)
         : BorderSide.none;
     final errorBorderSide = showBorder ? BorderSide(color: cs.error) : BorderSide.none;
-    final disabledBorderSide = showBorder
-        ? BorderSide(color: cs.onSurface.withValues(alpha: 0.12))
-        : BorderSide.none;
+    final disabledBorderSide =
+        showBorder ? BorderSide(color: cs.onSurface.withValues(alpha: 0.12)) : BorderSide.none;
 
     // ── InputDecoration — mirrors AppTextField style ─────────────────────────
     final decoration = InputDecoration(
@@ -135,9 +133,9 @@ class AppSearchableDropdown<T> extends StatelessWidget {
       fillColor: fillColor,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       hintText: hint,
-      hintStyle: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+      hintStyle: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
       errorText: hasError ? errorText : null,
-      errorStyle: tt.bodySmall?.copyWith(color: cs.error),
+      errorStyle: tt.bodyMedium?.copyWith(color: cs.error),
       errorMaxLines: 2,
       prefixIcon: prefixIcon != null
           ? SizedBox(
@@ -184,7 +182,7 @@ class AppSearchableDropdown<T> extends StatelessWidget {
       searchFieldProps: TextFieldProps(
         decoration: InputDecoration(
           hintText: searchHint,
-          hintStyle: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+          hintStyle: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
           prefixIcon: Icon(Icons.search_rounded, size: 20, color: cs.onSurfaceVariant),
           filled: true,
           fillColor: cs.surfaceContainerHighest,
@@ -194,7 +192,7 @@ class AppSearchableDropdown<T> extends StatelessWidget {
           ),
           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         ),
-        style: tt.bodySmall,
+        style: tt.bodyMedium,
         autofocus: true,
       ),
       menuProps: MenuProps(
@@ -213,14 +211,13 @@ class AppSearchableDropdown<T> extends StatelessWidget {
             overflow: popupItemTextMode == AppDropdownTextMode.singleLine
                 ? TextOverflow.ellipsis
                 : TextOverflow.visible,
-            style: tt.bodySmall?.copyWith(
+            style: tt.bodyMedium?.copyWith(
               color: isSelected ? cs.primary : cs.onSurface,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             ),
           ),
-          trailing: isSelected
-              ? Icon(Icons.check_circle_rounded, size: 18, color: cs.primary)
-              : null,
+          trailing:
+              isSelected ? Icon(Icons.check_circle_rounded, size: 18, color: cs.primary) : null,
         );
       },
       // v5 emptyBuilder signature: (BuildContext, String searchEntry) — 2 args
@@ -231,7 +228,7 @@ class AppSearchableDropdown<T> extends StatelessWidget {
           children: [
             Icon(Icons.search_off_rounded, size: 20, color: cs.onSurfaceVariant),
             const SizedBox(width: 8),
-            Text('Tidak ada hasil', style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+            Text('Tidak ada hasil', style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
           ],
         ),
       ),
@@ -259,7 +256,7 @@ class AppSearchableDropdown<T> extends StatelessWidget {
               overflow: selectedTextMode == AppDropdownTextMode.singleLine
                   ? TextOverflow.ellipsis
                   : TextOverflow.visible,
-              style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+              style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
             ),
           );
         }
@@ -273,7 +270,7 @@ class AppSearchableDropdown<T> extends StatelessWidget {
             overflow: selectedTextMode == AppDropdownTextMode.singleLine
                 ? TextOverflow.ellipsis
                 : TextOverflow.visible,
-            style: tt.bodySmall?.copyWith(color: cs.onSurface),
+            style: tt.bodyMedium?.copyWith(color: cs.onSurface),
           ),
         );
       },
@@ -282,7 +279,7 @@ class AppSearchableDropdown<T> extends StatelessWidget {
       ),
       dropdownDecoratorProps: DropDownDecoratorProps(
         dropdownSearchDecoration: decoration,
-        baseStyle: tt.bodySmall,
+        baseStyle: tt.bodyMedium,
       ),
     );
 
@@ -304,7 +301,7 @@ class AppSearchableDropdown<T> extends StatelessWidget {
         ),
         if (helperText != null) ...[
           const SizedBox(height: 2),
-          Text(helperText!, style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+          Text(helperText!, style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
         ],
         const SizedBox(height: 6),
         dropdown,

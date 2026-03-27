@@ -72,11 +72,11 @@ abstract class AppSnackbar {
   }
 
   static IconData _icon(SnackbarType type) => switch (type) {
-    SnackbarType.info => Icons.info_outline_rounded,
-    SnackbarType.success => Icons.check_circle_outline_rounded,
-    SnackbarType.warning => Icons.warning_amber_rounded,
-    SnackbarType.error => Icons.error_outline_rounded,
-  };
+        SnackbarType.info => Icons.info_outline_rounded,
+        SnackbarType.success => Icons.check_circle_outline_rounded,
+        SnackbarType.warning => Icons.warning_amber_rounded,
+        SnackbarType.error => Icons.error_outline_rounded,
+      };
 
   // ── Public API ──────────────────────────────────────────────────────────────
 
@@ -102,15 +102,24 @@ abstract class AppSnackbar {
     VoidCallback? onAction,
     Duration duration = const Duration(seconds: 4),
   }) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isDesktopLike = screenWidth >= 1024;
+    final desktopWidth = (screenWidth * 0.25).clamp(320.0, 520.0);
+    final desktopMargin = EdgeInsets.only(
+      left: (screenWidth - desktopWidth - 16).clamp(16.0, double.infinity),
+      right: 16,
+      bottom: 16,
+    );
+
     final bg = _background(context, type);
     final btnColors = _buttonColors(context, type);
     final fg = btnColors.fg;
     final icon = _icon(type);
     final labelStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
-      color: btnColors.fg,
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0.5,
-    );
+          color: btnColors.fg,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.5,
+        );
 
     final effectiveLabel = actionLabel ?? 'OK';
     final effectiveAction = actionLabel != null ? onAction : null;
@@ -121,9 +130,10 @@ abstract class AppSnackbar {
         SnackBar(
           duration: duration,
           behavior: SnackBarBehavior.floating,
+          width: null,
           backgroundColor: bg,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          margin: const EdgeInsets.all(16),
+          margin: isDesktopLike ? desktopMargin : const EdgeInsets.all(16),
           // Remove default horizontal padding so we can control layout manually.
           padding: EdgeInsets.zero,
           content: Padding(

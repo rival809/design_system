@@ -130,7 +130,7 @@ class _TablePageState extends State<TablePage> {
             children: const [
               Text('Aksi'),
               SizedBox(width: 4),
-              const Icon(Icons.keyboard_arrow_down, size: 16),
+              Icon(Icons.keyboard_arrow_down, size: 16),
             ],
           ),
         ),

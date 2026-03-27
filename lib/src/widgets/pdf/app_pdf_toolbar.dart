@@ -61,8 +61,7 @@ class AppPdfToolbar extends StatelessWidget {
             children: [
               // 1. Menu Icon (Search)
               IconButton(
-                icon: const Icon(Icons.search),
-                tooltip: 'Search Document',
+                icon: const Icon(Icons.menu),
                 onPressed: onMenuPressed,
                 splashRadius: 20,
               ),
@@ -135,12 +134,6 @@ class AppPdfToolbar extends StatelessWidget {
                       icon: const Icon(Icons.fit_screen),
                       onPressed: _fitWidth,
                       tooltip: 'Fit screen',
-                      splashRadius: 20,
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.rotate_right),
-                      onPressed: () {}, // Optional rotate
-                      tooltip: 'Rotate',
                       splashRadius: 20,
                     ),
                     const Spacer(),

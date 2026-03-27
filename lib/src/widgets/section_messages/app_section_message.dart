@@ -77,7 +77,7 @@ class AppSectionMessage extends StatelessWidget {
     final resolvedIconColor = iconColor ?? _resolveIconColor();
     final resolvedMessageStyle = Theme.of(
       context,
-    ).textTheme.bodyLarge?.copyWith(color: cs.onSurface).merge(messageStyle);
+    ).textTheme.bodyMedium?.copyWith(color: cs.onSurface).merge(messageStyle);
 
     return Container(
       padding: padding,

@@ -133,7 +133,8 @@ class AppDatePicker extends StatelessWidget {
             Expanded(
               child: Text(
                 hasValue ? _formatDate(value!) : (hint ?? ''),
-                style: tt.bodySmall?.copyWith(color: hasValue ? cs.onSurface : cs.onSurfaceVariant),
+                style:
+                    tt.bodyMedium?.copyWith(color: hasValue ? cs.onSurface : cs.onSurfaceVariant),
               ),
             ),
             Icon(Icons.arrow_drop_down_rounded, size: 24, color: cs.onSurfaceVariant),

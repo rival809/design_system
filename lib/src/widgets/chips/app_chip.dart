@@ -65,7 +65,8 @@ class AppChip extends StatelessWidget {
       child: Text(
         label,
         textAlign: TextAlign.center,
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(color: fg).merge(textStyle),
+        style: textStyle?.copyWith(color: fg) ??
+            Theme.of(context).textTheme.labelSmall?.copyWith(color: fg),
       ),
     );
   }

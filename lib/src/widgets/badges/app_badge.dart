@@ -28,19 +28,19 @@ class AppBadge extends StatelessWidget {
     this.textStyle,
     this.backgroundColor,
     this.foregroundColor,
-  }) : isDot = false,
-       dotSize = 0;
+  })  : isDot = false,
+        dotSize = 0;
 
   const AppBadge.dot({
     super.key,
     this.variant = BadgeVariant.primary,
     this.dotSize = 8,
     this.backgroundColor,
-  }) : label = '',
-       isDot = true,
-       padding = EdgeInsets.zero,
-       textStyle = null,
-       foregroundColor = null;
+  })  : label = '',
+        isDot = true,
+        padding = EdgeInsets.zero,
+        textStyle = null,
+        foregroundColor = null;
 
   final String label;
   final BadgeVariant variant;

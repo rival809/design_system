@@ -26,13 +26,13 @@ enum ButtonVariant {
 
 /// Size preset for [PrimaryButton].
 enum ButtonSize {
-  /// Compact size — suitable for dense UIs, toolbars, and inline actions.
+  /// Compact size â€” suitable for dense UIs, toolbars, and inline actions.
   small,
 
-  /// Default size — suitable for most use cases.
+  /// Default size â€” suitable for most use cases.
   medium,
 
-  /// Large size — suitable for prominent CTAs.
+  /// Large size â€” suitable for prominent CTAs.
   large,
 }
 
@@ -55,7 +55,7 @@ enum ButtonSize {
 /// )
 ///
 /// PrimaryButton(
-///   label: 'Submitting…',
+///   label: 'Submittingâ€¦',
 ///   isLoading: true,
 ///   onPressed: null,
 /// )
@@ -74,10 +74,10 @@ class PrimaryButton extends StatelessWidget {
   /// rendered in a disabled state.
   final VoidCallback? onPressed;
 
-  /// Visual variant — [ButtonVariant.filled] by default.
+  /// Visual variant â€” [ButtonVariant.filled] by default.
   final ButtonVariant variant;
 
-  /// Size preset — [ButtonSize.medium] by default.
+  /// Size preset â€” [ButtonSize.medium] by default.
   final ButtonSize size;
 
   /// When `true`, replaces [label] with a [CircularProgressIndicator] and
@@ -120,16 +120,16 @@ class PrimaryButton extends StatelessWidget {
   }
 
   double get _fontSize => switch (size) {
-    ButtonSize.small => 12,
-    ButtonSize.medium => 14,
-    ButtonSize.large => 16,
-  };
+        ButtonSize.small => 12,
+        ButtonSize.medium => 14,
+        ButtonSize.large => 16,
+      };
 
   double get _loaderSize => switch (size) {
-    ButtonSize.small => 14,
-    ButtonSize.medium => 18,
-    ButtonSize.large => 22,
-  };
+        ButtonSize.small => 14,
+        ButtonSize.medium => 18,
+        ButtonSize.large => 22,
+      };
 
   // ---------------------------------------------------------------------------
   // Build
@@ -141,82 +141,82 @@ class PrimaryButton extends StatelessWidget {
 
     Widget button = switch (variant) {
       ButtonVariant.filled => _FilledButton(
-        label: label,
-        onPressed: isLoading ? null : onPressed,
-        padding: _padding,
-        fontSize: _fontSize,
-        loaderSize: _loaderSize,
-        isLoading: isLoading,
-        leadingIcon: leadingIcon,
-        trailingIcon: trailingIcon,
-        colorScheme: colorScheme,
-      ),
+          label: label,
+          onPressed: isLoading ? null : onPressed,
+          padding: _padding,
+          fontSize: _fontSize,
+          loaderSize: _loaderSize,
+          isLoading: isLoading,
+          leadingIcon: leadingIcon,
+          trailingIcon: trailingIcon,
+          colorScheme: colorScheme,
+        ),
       ButtonVariant.outlined => _OutlinedButtonWidget(
-        label: label,
-        onPressed: isLoading ? null : onPressed,
-        padding: _padding,
-        fontSize: _fontSize,
-        loaderSize: _loaderSize,
-        isLoading: isLoading,
-        leadingIcon: leadingIcon,
-        trailingIcon: trailingIcon,
-        colorScheme: colorScheme,
-      ),
+          label: label,
+          onPressed: isLoading ? null : onPressed,
+          padding: _padding,
+          fontSize: _fontSize,
+          loaderSize: _loaderSize,
+          isLoading: isLoading,
+          leadingIcon: leadingIcon,
+          trailingIcon: trailingIcon,
+          colorScheme: colorScheme,
+        ),
       ButtonVariant.text => _TextButtonWidget(
-        label: label,
-        onPressed: isLoading ? null : onPressed,
-        padding: _padding,
-        fontSize: _fontSize,
-        loaderSize: _loaderSize,
-        isLoading: isLoading,
-        leadingIcon: leadingIcon,
-        trailingIcon: trailingIcon,
-        colorScheme: colorScheme,
-      ),
+          label: label,
+          onPressed: isLoading ? null : onPressed,
+          padding: _padding,
+          fontSize: _fontSize,
+          loaderSize: _loaderSize,
+          isLoading: isLoading,
+          leadingIcon: leadingIcon,
+          trailingIcon: trailingIcon,
+          colorScheme: colorScheme,
+        ),
       ButtonVariant.secondary => _SecondaryButton(
-        label: label,
-        onPressed: isLoading ? null : onPressed,
-        padding: _padding,
-        fontSize: _fontSize,
-        loaderSize: _loaderSize,
-        isLoading: isLoading,
-        leadingIcon: leadingIcon,
-        trailingIcon: trailingIcon,
-        colorScheme: colorScheme,
-      ),
+          label: label,
+          onPressed: isLoading ? null : onPressed,
+          padding: _padding,
+          fontSize: _fontSize,
+          loaderSize: _loaderSize,
+          isLoading: isLoading,
+          leadingIcon: leadingIcon,
+          trailingIcon: trailingIcon,
+          colorScheme: colorScheme,
+        ),
       ButtonVariant.danger => _DangerButton(
-        label: label,
-        onPressed: isLoading ? null : onPressed,
-        padding: _padding,
-        fontSize: _fontSize,
-        loaderSize: _loaderSize,
-        isLoading: isLoading,
-        leadingIcon: leadingIcon,
-        trailingIcon: trailingIcon,
-        colorScheme: colorScheme,
-      ),
+          label: label,
+          onPressed: isLoading ? null : onPressed,
+          padding: _padding,
+          fontSize: _fontSize,
+          loaderSize: _loaderSize,
+          isLoading: isLoading,
+          leadingIcon: leadingIcon,
+          trailingIcon: trailingIcon,
+          colorScheme: colorScheme,
+        ),
       ButtonVariant.tertiary => _TertiaryButton(
-        label: label,
-        onPressed: isLoading ? null : onPressed,
-        padding: _padding,
-        fontSize: _fontSize,
-        loaderSize: _loaderSize,
-        isLoading: isLoading,
-        leadingIcon: leadingIcon,
-        trailingIcon: trailingIcon,
-        colorScheme: colorScheme,
-      ),
+          label: label,
+          onPressed: isLoading ? null : onPressed,
+          padding: _padding,
+          fontSize: _fontSize,
+          loaderSize: _loaderSize,
+          isLoading: isLoading,
+          leadingIcon: leadingIcon,
+          trailingIcon: trailingIcon,
+          colorScheme: colorScheme,
+        ),
       ButtonVariant.link => _LinkButton(
-        label: label,
-        onPressed: isLoading ? null : onPressed,
-        padding: _padding,
-        fontSize: _fontSize,
-        loaderSize: _loaderSize,
-        isLoading: isLoading,
-        colorScheme: colorScheme,
-        leadingIcon: leadingIcon,
-        trailingIcon: trailingIcon,
-      ),
+          label: label,
+          onPressed: isLoading ? null : onPressed,
+          padding: _padding,
+          fontSize: _fontSize,
+          loaderSize: _loaderSize,
+          isLoading: isLoading,
+          colorScheme: colorScheme,
+          leadingIcon: leadingIcon,
+          trailingIcon: trailingIcon,
+        ),
     };
 
     if (expand) {
@@ -256,6 +256,10 @@ class _ButtonContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final resolvedTextStyle =
+        textStyle ?? Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: fontSize);
+    final iconThemeData = IconThemeData(size: fontSize + 2, color: overrideColor);
+
     if (isLoading) {
       return SizedBox(
         width: loaderSize,
@@ -268,7 +272,7 @@ class _ButtonContent extends StatelessWidget {
     }
 
     final hasLabel = label != null && label!.isNotEmpty;
-    
+
     Widget content;
     if (!hasLabel) {
       // Icon only implementation
@@ -287,27 +291,23 @@ class _ButtonContent extends StatelessWidget {
     } else {
       // Label with optional icons
       if (leadingIcon == null && trailingIcon == null) {
-        content = Text(label!, style: textStyle);
+        content = Text(label!, style: resolvedTextStyle);
       } else {
         content = Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (leadingIcon != null) ...[leadingIcon!, const SizedBox(width: 8)],
-            Text(label!, style: textStyle),
+            Text(label!, style: resolvedTextStyle),
             if (trailingIcon != null) ...[const SizedBox(width: 8), trailingIcon!],
           ],
         );
       }
     }
 
+    content = IconTheme.merge(data: iconThemeData, child: content);
+
     if (overrideColor != null) {
-      content = IconTheme(
-        data: IconThemeData(color: overrideColor, size: fontSize + 2),
-        child: DefaultTextStyle.merge(
-          style: TextStyle(color: overrideColor),
-          child: content,
-        ),
-      );
+      content = DefaultTextStyle.merge(style: TextStyle(color: overrideColor), child: content);
     }
 
     return content;
@@ -340,7 +340,7 @@ class _FilledButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = colorScheme;
-    final labelStyle = Theme.of(context).textTheme.labelLarge?.copyWith(fontSize: fontSize);
+    final labelStyle = Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: fontSize);
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
@@ -394,16 +394,15 @@ class _OutlinedButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = colorScheme;
-    final labelStyle = Theme.of(context).textTheme.labelLarge?.copyWith(fontSize: fontSize);
+    final labelStyle = Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: fontSize);
     return OutlinedButton(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
         foregroundColor: cs.primary,
         disabledForegroundColor: cs.onSurface.withValues(alpha: 0.38),
         side: BorderSide(
-          color: onPressed == null && !isLoading
-              ? cs.onSurface.withValues(alpha: 0.12)
-              : cs.primary,
+          color:
+              onPressed == null && !isLoading ? cs.onSurface.withValues(alpha: 0.12) : cs.primary,
         ),
         padding: padding,
         minimumSize: Size.zero,
@@ -448,7 +447,7 @@ class _TextButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final labelStyle = Theme.of(context).textTheme.labelLarge?.copyWith(fontSize: fontSize);
+    final labelStyle = Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: fontSize);
     return TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
@@ -473,7 +472,7 @@ class _TextButtonWidget extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Secondary — Outlined using secondary color
+// Secondary â€” Outlined using secondary color
 // ---------------------------------------------------------------------------
 
 class _SecondaryButton extends StatelessWidget {
@@ -502,16 +501,15 @@ class _SecondaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = colorScheme;
-    final labelStyle = Theme.of(context).textTheme.labelLarge?.copyWith(fontSize: fontSize);
+    final labelStyle = Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: fontSize);
     return OutlinedButton(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
         foregroundColor: cs.secondary,
         disabledForegroundColor: cs.onSurface.withValues(alpha: 0.38),
         side: BorderSide(
-          color: onPressed == null && !isLoading
-              ? cs.onSurface.withValues(alpha: 0.12)
-              : cs.secondary,
+          color:
+              onPressed == null && !isLoading ? cs.onSurface.withValues(alpha: 0.12) : cs.secondary,
         ),
         padding: padding,
         minimumSize: Size.zero,
@@ -532,7 +530,7 @@ class _SecondaryButton extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Danger — Filled using error color
+// Danger â€” Filled using error color
 // ---------------------------------------------------------------------------
 
 class _DangerButton extends StatelessWidget {
@@ -561,7 +559,7 @@ class _DangerButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = colorScheme;
-    final labelStyle = Theme.of(context).textTheme.labelLarge?.copyWith(fontSize: fontSize);
+    final labelStyle = Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: fontSize);
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
@@ -590,7 +588,7 @@ class _DangerButton extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Tertiary — Outlined using tertiary color
+// Tertiary â€” Outlined using tertiary color
 // ---------------------------------------------------------------------------
 
 class _TertiaryButton extends StatelessWidget {
@@ -619,7 +617,7 @@ class _TertiaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = colorScheme;
-    final labelStyle = Theme.of(context).textTheme.labelLarge?.copyWith(fontSize: fontSize);
+    final labelStyle = Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: fontSize);
     return TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
@@ -644,7 +642,7 @@ class _TertiaryButton extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Link — Text button with underline, minimal tap area
+// Link â€” Text button with underline, minimal tap area
 // ---------------------------------------------------------------------------
 
 class _LinkButton extends StatelessWidget {
@@ -674,12 +672,12 @@ class _LinkButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = colorScheme;
     final activeColor = onPressed == null ? cs.onSurface.withValues(alpha: 0.38) : cs.primary;
-    final labelStyle = Theme.of(context).textTheme.labelLarge?.copyWith(
-      fontSize: fontSize,
-      color: activeColor,
-      decoration: TextDecoration.underline,
-      decorationColor: activeColor,
-    );
+    final labelStyle = Theme.of(context).textTheme.titleSmall?.copyWith(
+          fontSize: fontSize,
+          color: activeColor,
+          decoration: TextDecoration.underline,
+          decorationColor: activeColor,
+        );
     // Use InkWell directly so the ripple/hotspot is tight around the content.
     return InkWell(
       onTap: onPressed,
