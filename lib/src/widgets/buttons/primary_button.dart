@@ -237,10 +237,10 @@ class _ButtonContent extends StatelessWidget {
     required this.isLoading,
     required this.loaderSize,
     required this.loaderColor,
+    required this.contentColor,
     required this.fontSize,
     this.leadingIcon,
     this.trailingIcon,
-    this.overrideColor,
     this.textStyle,
   });
 
@@ -248,17 +248,19 @@ class _ButtonContent extends StatelessWidget {
   final bool isLoading;
   final double loaderSize;
   final Color loaderColor;
+  final Color contentColor;
   final double fontSize;
   final Widget? leadingIcon;
   final Widget? trailingIcon;
-  final Color? overrideColor;
   final TextStyle? textStyle;
 
   @override
   Widget build(BuildContext context) {
-    final resolvedTextStyle =
-        textStyle ?? Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: fontSize);
-    final iconThemeData = IconThemeData(size: fontSize + 2, color: overrideColor);
+    final resolvedTextStyle = (textStyle ?? Theme.of(context).textTheme.titleSmall)?.copyWith(
+      fontSize: fontSize,
+      color: contentColor,
+    );
+    final iconThemeData = IconThemeData(size: fontSize + 2, color: contentColor);
 
     if (isLoading) {
       return SizedBox(
@@ -305,10 +307,6 @@ class _ButtonContent extends StatelessWidget {
     }
 
     content = IconTheme.merge(data: iconThemeData, child: content);
-
-    if (overrideColor != null) {
-      content = DefaultTextStyle.merge(style: TextStyle(color: overrideColor), child: content);
-    }
 
     return content;
   }
@@ -360,6 +358,7 @@ class _FilledButton extends StatelessWidget {
         isLoading: isLoading,
         loaderSize: loaderSize,
         loaderColor: cs.onPrimary,
+        contentColor: cs.onPrimary,
         fontSize: fontSize,
         leadingIcon: leadingIcon,
         trailingIcon: trailingIcon,
@@ -414,6 +413,7 @@ class _OutlinedButtonWidget extends StatelessWidget {
         isLoading: isLoading,
         loaderSize: loaderSize,
         loaderColor: colorScheme.primary,
+        contentColor: colorScheme.primary,
         fontSize: fontSize,
         leadingIcon: leadingIcon,
         trailingIcon: trailingIcon,
@@ -463,6 +463,7 @@ class _TextButtonWidget extends StatelessWidget {
         isLoading: isLoading,
         loaderSize: loaderSize,
         loaderColor: colorScheme.primary,
+        contentColor: colorScheme.primary,
         fontSize: fontSize,
         leadingIcon: leadingIcon,
         trailingIcon: trailingIcon,
@@ -505,7 +506,7 @@ class _SecondaryButton extends StatelessWidget {
     return OutlinedButton(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
-        foregroundColor: cs.secondary,
+        foregroundColor: cs.onSurface,
         disabledForegroundColor: cs.onSurface.withValues(alpha: 0.38),
         side: BorderSide(
           color:
@@ -520,7 +521,8 @@ class _SecondaryButton extends StatelessWidget {
         label: label,
         isLoading: isLoading,
         loaderSize: loaderSize,
-        loaderColor: cs.secondary,
+        loaderColor: cs.onSurface,
+        contentColor: cs.onSurface,
         fontSize: fontSize,
         leadingIcon: leadingIcon,
         trailingIcon: trailingIcon,
@@ -579,6 +581,7 @@ class _DangerButton extends StatelessWidget {
         isLoading: isLoading,
         loaderSize: loaderSize,
         loaderColor: cs.onError,
+        contentColor: cs.onError,
         fontSize: fontSize,
         leadingIcon: leadingIcon,
         trailingIcon: trailingIcon,
@@ -621,7 +624,7 @@ class _TertiaryButton extends StatelessWidget {
     return TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
-        foregroundColor: cs.primary,
+        foregroundColor: cs.onSurface,
         disabledForegroundColor: cs.onSurface.withValues(alpha: 0.38),
         padding: padding,
         minimumSize: Size.zero,
@@ -632,7 +635,8 @@ class _TertiaryButton extends StatelessWidget {
         label: label,
         isLoading: isLoading,
         loaderSize: loaderSize,
-        loaderColor: cs.primary,
+        loaderColor: cs.onSurface,
+        contentColor: cs.onSurface,
         fontSize: fontSize,
         leadingIcon: leadingIcon,
         trailingIcon: trailingIcon,
@@ -689,10 +693,10 @@ class _LinkButton extends StatelessWidget {
           isLoading: isLoading,
           loaderSize: loaderSize,
           loaderColor: activeColor,
+          contentColor: activeColor,
           fontSize: fontSize,
           leadingIcon: leadingIcon,
           trailingIcon: trailingIcon,
-          overrideColor: activeColor,
           textStyle: labelStyle,
         ),
       ),
